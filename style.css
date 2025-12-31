@@ -1,0 +1,391 @@
+/* ==== UMUM ==== */
+body {
+  margin: 0;
+  font-family: "Poppins", Arial, sans-serif;
+  color: #000;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* ==== LOGIN PAGE ==== */
+.login-body {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  background: url("img/lab.jpeg") no-repeat center center fixed;
+  background-size: cover;
+}
+
+.login-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.85);
+  color: #078065;
+  padding: 40px;
+  border-radius: 20px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 12px;
+  background: #078065;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.btn-login:hover {
+  background: #045c4f;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ==== BERANDA ==== */
+.beranda-page {
+  background: url("img/lab.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.beranda-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100vh;
+}
+
+.beranda-container h1 {
+  color: #045c4f;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.beranda-container p {
+  color: #222;
+  background: rgba(255, 255, 255, 0.75);
+  padding: 10px 20px;
+  border-radius: 10px;
+  max-width: 700px;
+  line-height: 1.6;
+  backdrop-filter: blur(3px);
+}
+
+.menu-vertikal {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.btn-menu {
+  display: block;
+  padding: 18px 30px;
+  background: rgba(7, 128, 101, 0.9);
+  color: white;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.3s;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
+}
+
+.btn-menu:hover {
+  transform: scale(1.05);
+  background: rgba(4, 92, 79, 0.95);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ==== MATERI ==== */
+.materi-page {
+  background: url("img/lab.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  filter: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 230px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  overflow-y: auto;
+  padding: 25px 15px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 10px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar li:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(4px);
+}
+
+/* ===== Konten Ringkasan ===== */
+.content {
+  margin-left: 260px;
+  flex: 1;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.82);
+  overflow-y: auto;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+  min-height: 100vh;
+  color: #045c4f;
+  backdrop-filter: blur(6px);
+  box-sizing: border-box;
+  max-height: 100vh;
+}
+
+.content h1 {
+  color: #045c4f;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.content p {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #045c4f;
+}
+
+.materi-item {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.materi-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.materi-item h3 {
+  color: #045c4f;
+  margin-bottom: 10px;
+}
+
+.btn-full {
+  background: linear-gradient(90deg, #078065, #045c4f);
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-full:hover {
+  background: linear-gradient(90deg, #09a57a, #056e59);
+  box-shadow: 0 0 10px rgba(7, 128, 101, 0.5);
+  transform: scale(1.05);
+}
+
+/* ===== Popup Materi Full ===== */
+#materi-full-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: rgba(255, 255, 255, 0.95);
+  max-width: 900px;
+  width: 90%;
+  max-height: 85%;
+  overflow-y: auto;
+  padding: 25px 30px;
+  border-radius: 12px;
+  position: relative;
+  color: #033a2e;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+#close-popup {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 26px;
+  cursor: pointer;
+  color: #045c4f;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+#close-popup:hover {
+  color: #078065;
+  transform: scale(1.2);
+}
+
+/* ===== QUIZ PAGE ===== */
+.quiz-page {
+  background: url("img/lab.jpeg") no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 0;
+  overflow-y: auto;
+  color: #045c4f;
+  font-family: "Poppins", sans-serif;
+}
+
+.quiz-container {
+  width: 92%;
+  max-width: 1000px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  animation: fadeIn 0.6s ease;
+}
+
+.quiz-container button {
+  background-color: #078065;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.quiz-container button:hover {
+  background-color: #045c4f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Responsif ===== */
+@media screen and (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .quiz-container {
+    width: 95%;
+    padding: 20px;
+  }
+}
+
+/* ===== Gambar kecil di materi ===== */
+.materi-images-small {
+  width: 120px;
+  height: auto;
+  border-radius: 8px;
+  object-fit: contain;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.materi-images-small:hover {
+  transform: scale(1.1);
+}
+
+/* ===== Tombol Kembali ===== */
+.btn-kembali {
+  background: #078065;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.btn-kembali:hover {
+  background: #045c4f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
