@@ -273,7 +273,6 @@ mysqli_stmt_execute($stmt_progress);
         }
         .pdf-container {
                 display: flex;
-                
                 gap: 10px;
             }
 
@@ -415,86 +414,81 @@ mysqli_stmt_execute($stmt_progress);
         </div>
 
         <!-- Main Content -->
-       <main class="book-viewer">
+      <main class="book-viewer">
     <div class="book-container">
 
-   <?php if (isset($_GET['quiz']) && $_GET['quiz'] === 'esai'): ?>
+    <?php 
+    // Menentukan path file
+    $file_path = "reader/ADBI421103/" . $doc;
+    
+    // Cek apakah file ada
+    if (file_exists($file_path)): 
+    ?>
+        <div class="pdf-container" style="display: flex; width: 100%; height: 85vh; overflow: hidden;">
+            
+            <iframe src="<?php echo htmlspecialchars($file_path); ?>" 
+                    class="pdf-viewer"
+                    style="flex: 1; border: none; height: 100%;"
+                    title="<?php echo htmlspecialchars($current_page_info['judul_halaman']); ?>">
+            </iframe>
 
-        <div style="padding: 30px; color: #000; overflow-y: auto; max-height: 80vh;">
-            <div style="border-bottom: 2px solid #0073e6; margin-bottom: 20px; padding-bottom: 10px;">
-                <h2>Kuis Akhir (Esai)</h2>
-                <p class="text-muted">Jawablah pertanyaan berikut sesuai pemahaman Anda.</p>
-            </div>
-
-            <?php if (empty($soal_list)): ?>
-                <div class="alert alert-warning" style="background: #fff3cd; padding: 15px; border-radius: 5px;">
-                    Belum ada soal untuk materi ini.
+            <div style="flex: 1; padding: 30px; color: #000; overflow-y: auto; height: 100%; background: #fff; border-left: 2px solid #ddd;">
+                
+                <div style="border-bottom: 2px solid #0073e6; margin-bottom: 20px; padding-bottom: 10px;">
+                    <h2>Kuis Akhir (Esai)</h2>
+                    <p class="text-muted">Jawablah pertanyaan berikut sesuai pemahaman Anda.</p>
                 </div>
-            <?php else: ?>
 
-                <form method="post" action="simpan_kuis_esai.php">
-                    <input type="hidden" name="buku_id" value="<?php echo $buku_id; ?>">
-
-                    <?php foreach ($soal_list as $index => $soal): ?>
-                        <div style="margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-                            <label style="display: block; margin-bottom: 10px; font-weight: bold; font-size: 1.1em;">
-                                <?php echo ($index + 1) . ". " . htmlspecialchars($soal['pertanyaan']); ?>
-                            </label>
-                            
-                            <textarea name="jawaban[<?php echo $soal['soal_id']; ?>]" 
-                                      rows="4" 
-                                      required 
-                                      style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: sans-serif;"
-                                      placeholder="Tulis jawaban Anda di sini..."><?php echo htmlspecialchars($soal['jawaban_user'] ?? ''); ?></textarea>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <div style="text-align: right;">
-                        <button type="submit" name="submit_quiz" style="
-                            background: linear-gradient(90deg, #0073e6, #005baa);
-                            color: #fff;
-                            padding: 12px 30px;
-                            border: none;
-                            border-radius: 6px;
-                            font-size: 16px;
-                            font-weight: bold;
-                            cursor: pointer;
-                            box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                            <i class="bi bi-send"></i> Kirim Jawaban
-                        </button>
+                <?php if (empty($soal_list)): ?>
+                    <div class="alert alert-warning" style="background: #fff3cd; padding: 15px; border-radius: 5px;">
+                        Belum ada soal untuk materi ini.
                     </div>
-                </form>
-            <?php endif; ?>
-        </div>
+                <?php else: ?>
+
+                    <form method="post" action="simpan_kuis_esai.php">
+                        <input type="hidden" name="buku_id" value="<?php echo $buku_id; ?>">
+
+                        <?php foreach ($soal_list as $index => $soal): ?>
+                            <div style="margin-bottom: 25px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+                                <label style="display: block; margin-bottom: 10px; font-weight: bold; font-size: 1.1em;">
+                                    <?php echo ($index + 1) . ". " . htmlspecialchars($soal['pertanyaan']); ?>
+                                </label>
+                                
+                                <textarea name="jawaban[<?php echo $soal['soal_id']; ?>]" 
+                                          rows="4" 
+                                          required 
+                                          style="width:100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: sans-serif;"
+                                          placeholder="Tulis jawaban Anda di sini..."><?php echo htmlspecialchars($soal['jawaban_user'] ?? ''); ?></textarea>
+                            </div>
+                        <?php endforeach; ?>
+
+                        <div style="text-align: right;">
+                            <button type="submit" name="submit_quiz" style="
+                                background: linear-gradient(90deg, #0073e6, #005baa);
+                                color: #fff;
+                                padding: 12px 30px;
+                                border: none;
+                                border-radius: 6px;
+                                font-size: 16px;
+                                font-weight: bold;
+                                cursor: pointer;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                                <i class="bi bi-send"></i> Kirim Jawaban
+                            </button>
+                        </div>
+                    </form>
+                <?php endif; ?>
+            </div> 
+            </div>
 
     <?php else: ?>
-
-        <!-- PDF VIEWER -->
-        <?php 
-        $file_path = "reader/ADBI421103/" . $doc;
-        if (file_exists($file_path)): 
-        ?>
-        <div class="pdf-container">
-            <iframe src="<?php echo htmlspecialchars($file_path); ?>" 
-                    class="pdf-viewer"
-                    title="<?php echo htmlspecialchars($current_page_info['judul_halaman']); ?>">
-            </iframe>
-            <iframe src="<?php echo htmlspecialchars($file_path); ?>" 
-                    class="pdf-viewer"
-                    title="<?php echo htmlspecialchars($current_page_info['judul_halaman']); ?>">
-            </iframe>
+        <div style="padding: 40px; text-align: center; color: #333;">
+            <h2>File tidak ditemukan</h2>
         </div>
-        <?php else: ?>
-            <div style="padding: 40px; text-align: center; color: #333;">
-                <h2>File tidak ditemukan</h2>
-            </div>
-        <?php endif; ?>
-
     <?php endif; ?>
 
     </div>
 </main>
-
 
         <!-- Navigation Controls -->
         <div class="nav-controls">
