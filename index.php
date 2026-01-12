@@ -168,22 +168,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
         
-        .demo-accounts {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-        
-        .demo-accounts h4 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .demo-accounts p {
-            margin: 5px 0;
+          .login-link {
+            text-align: center;
+            margin-top: 20px;
             color: #666;
+        }
+        
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
         }
         
         @media (max-width: 768px) {
@@ -231,10 +229,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn-login">Login</button>
             </form>
             
-            <div class="demo-accounts">
-                <h4>📋 Demo Accounts:</h4>
-                <p><strong>Guru:</strong> admin / admin123</p>
-                <p><strong>Siswa:</strong> siswa1 / siswa123</p>
+             <div class="login-link">
+                Belum punya akun? <a href="register.php">Daftar di sini</a>
             </div>
         </div>
     </div>

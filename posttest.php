@@ -9,11 +9,14 @@ $check_query = "SELECT * FROM nilai_posttest WHERE user_id = $user_id";
 $check_result = mysqli_query($conn, $check_query);
 $already_completed = mysqli_num_rows($check_result) > 0;
 
-// Check if all materi completed
-$progress_query = "SELECT COUNT(*) as total FROM progress_siswa WHERE user_id = $user_id AND status = 'completed'";
-$progress_result = mysqli_query($conn, $progress_query);
-$progress_data = mysqli_fetch_assoc($progress_result);
-$all_materi_completed = $progress_data['total'] >= 6;
+
+// Check if quiz interaktif completed
+$quiz_query = "SELECT COUNT(*) AS total FROM nilai_quiz WHERE user_id = $user_id";
+$quiz_result = mysqli_query($conn, $quiz_query);
+$quiz_data = mysqli_fetch_assoc($quiz_result);
+$quiz_completed = $quiz_data['total'] > 0;
+
+
 
 // Process submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_test'])) {
@@ -361,7 +364,8 @@ if ($already_completed) {
                 
                 <a href="rekap_nilai_siswa.php" class="btn-submit">Lihat Rekap Nilai</a>
             </div>
-        <?php elseif (!$all_materi_completed): ?>
+        <?php elseif (!$quiz_completed): ?>
+
             <div class="locked-message">
                 <div class="locked-icon">🔒</div>
                 <h2 style="color: #333; margin-bottom: 20px;">Post-Test Terkunci</h2>
@@ -439,7 +443,7 @@ if ($already_completed) {
     </div>
     
     <script>
-        <?php if (!$already_completed && !$show_success && $all_materi_completed): ?>
+        <?php if (!$already_completed && !$show_success): ?>
         let timeLeft = 30 * 60;
         const timerDisplay = document.getElementById('timer');
         const testForm = document.getElementById('testForm');

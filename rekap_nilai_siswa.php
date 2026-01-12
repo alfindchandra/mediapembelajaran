@@ -217,9 +217,7 @@ $rata_rata = $count_nilai > 0 ? $total_nilai / $count_nilai : 0;
             <?php endif; ?>
         </div>
         
-        <div class="export-section">
-            <a href="export_nilai_siswa.php" class="btn-export">📥 Download Rekap Nilai (PDF)</a>
-        </div>
+        
     </div>
 </body>
 </html>

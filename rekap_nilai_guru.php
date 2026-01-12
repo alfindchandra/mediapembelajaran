@@ -305,76 +305,68 @@ $siswa_result = mysqli_query($conn, $siswa_query);
                         <th>Nama Siswa</th>
                         <th>Username</th>
                         <th>Pre-Test</th>
-                        <th>Kuis 1</th>
-                        <th>Kuis 2</th>
-                        <th>Kuis 3</th>
-                        <th>Kuis 4</th>
-                        <th>Kuis 5</th>
-                        <th>Kuis 6</th>
+                        <th>Quiz</th>
                         <th>Post-Test</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <?php
+function getBadgeClass($nilai) {
+    if ($nilai === null) return 'badge-na';
+    if ($nilai >= 85) return 'badge-excellent';
+    if ($nilai >= 70) return 'badge-good';
+    if ($nilai >= 60) return 'badge-average';
+    return 'badge-poor';
+}
+
+function formatNilai($nilai) {
+    return $nilai !== null ? number_format($nilai, 2) : 'N/A';
+}
+?>
+
                     <?php 
-                    $no = 1;
-                    while ($siswa = mysqli_fetch_assoc($siswa_result)): 
-                        $user_id = $siswa['user_id'];
-                        
-                        // Get Pre-Test
-                        $pretest = mysqli_fetch_assoc(mysqli_query($conn, 
-                            "SELECT nilai FROM nilai_pretest WHERE user_id = $user_id"));
-                        
-                        // Get Post-Test
-                        $posttest = mysqli_fetch_assoc(mysqli_query($conn, 
-                            "SELECT nilai FROM nilai_posttest WHERE user_id = $user_id"));
-                        
-                        // Get Kuis scores
-                        $kuis_scores = [];
-                        for ($i = 1; $i <= 6; $i++) {
-                            $kuis = mysqli_fetch_assoc(mysqli_query($conn, 
-                                "SELECT nilai FROM nilai_kuis WHERE user_id = $user_id AND materi_id = $i"));
-                            $kuis_scores[$i] = $kuis ? $kuis['nilai'] : null;
-                        }
-                        
-                        function getBadgeClass($nilai) {
-                            if ($nilai === null) return 'badge-na';
-                            if ($nilai >= 85) return 'badge-excellent';
-                            if ($nilai >= 70) return 'badge-good';
-                            if ($nilai >= 60) return 'badge-average';
-                            return 'badge-poor';
-                        }
-                        
-                        function formatNilai($nilai) {
-                            return $nilai !== null ? number_format($nilai, 2) : 'N/A';
-                        }
-                    ?>
-                    <tr>
-                        <td><?php echo $no++; ?></td>
-                        <td><strong><?php echo $siswa['full_name']; ?></strong></td>
-                        <td><?php echo $siswa['username']; ?></td>
-                        <td>
-                            <span class="badge-score <?php echo getBadgeClass($pretest['nilai'] ?? null); ?>">
-                                <?php echo formatNilai($pretest['nilai'] ?? null); ?>
-                            </span>
-                        </td>
-                        <?php for ($i = 1; $i <= 6; $i++): ?>
-                        <td>
-                            <span class="badge-score <?php echo getBadgeClass($kuis_scores[$i]); ?>">
-                                <?php echo formatNilai($kuis_scores[$i]); ?>
-                            </span>
-                        </td>
-                        <?php endfor; ?>
-                        <td>
-                            <span class="badge-score <?php echo getBadgeClass($posttest['nilai'] ?? null); ?>">
-                                <?php echo formatNilai($posttest['nilai'] ?? null); ?>
-                            </span>
-                        </td>
-                        <td>
-                            <a href="detail_siswa.php?id=<?php echo $user_id; ?>" class="btn-detail">Detail</a>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
+$no = 1;
+while ($siswa = mysqli_fetch_assoc($siswa_result)): 
+    $user_id = $siswa['user_id'];
+
+    // Pre-Test
+    $pretest = mysqli_fetch_assoc(mysqli_query($conn, 
+        "SELECT nilai FROM nilai_pretest WHERE user_id = $user_id"));
+
+    // Post-Test
+    $posttest = mysqli_fetch_assoc(mysqli_query($conn, 
+        "SELECT nilai FROM nilai_posttest WHERE user_id = $user_id"));
+
+    // Interaktif / Quiz
+    $interaktif = mysqli_fetch_assoc(mysqli_query($conn, 
+        "SELECT nilai FROM nilai_quiz WHERE user_id = $user_id"));
+?>
+<tr>
+    <td><?= $no++; ?></td>
+    <td><strong><?= $siswa['full_name']; ?></strong></td>
+    <td><?= $siswa['username']; ?></td>
+    <td>
+        <span class="badge-score <?= getBadgeClass($pretest['nilai'] ?? null); ?>">
+            <?= formatNilai($pretest['nilai'] ?? null); ?>
+        </span>
+    </td>
+    <td>
+        <span class="badge-score <?= getBadgeClass($interaktif['nilai'] ?? null); ?>">
+            <?= formatNilai($interaktif['nilai'] ?? null); ?>
+        </span>
+    </td>
+    <td>
+        <span class="badge-score <?= getBadgeClass($posttest['nilai'] ?? null); ?>">
+            <?= formatNilai($posttest['nilai'] ?? null); ?>
+        </span>
+    </td>
+    <td>
+        <a href="detail_siswa.php?id=<?= $user_id; ?>" class="btn-detail">Detail</a>
+    </td>
+</tr>
+<?php endwhile; ?>
+
                 </tbody>
             </table>
             <?php else: ?>

@@ -12,25 +12,31 @@ $pretest_completed = mysqli_fetch_assoc(mysqli_query($conn, $pretest_completed_q
 $posttest_completed_query = "SELECT COUNT(DISTINCT user_id) as total FROM nilai_posttest";
 $posttest_completed = mysqli_fetch_assoc(mysqli_query($conn, $posttest_completed_query))['total'];
 
-$total_materi_query = "SELECT COUNT(*) as total FROM materi";
-$total_materi = mysqli_fetch_assoc(mysqli_query($conn, $total_materi_query))['total'];
+
 
 // Get recent activities
 $recent_query = "
-    SELECT u.full_name, 'Pre-Test' as tipe, np.nilai, np.completed_at as waktu
+    SELECT u.full_name, 'Pre-Test' AS tipe, np.nilai, np.completed_at AS waktu
     FROM nilai_pretest np
     JOIN users u ON np.user_id = u.user_id
+
     UNION ALL
-    SELECT u.full_name, 'Post-Test' as tipe, npo.nilai, npo.completed_at as waktu
+
+    SELECT u.full_name, 'Quiz Interaktif' AS tipe, nq.nilai, nq.completed_at AS waktu
+    FROM nilai_quiz nq
+    JOIN users u ON nq.user_id = u.user_id
+
+    UNION ALL
+
+    SELECT u.full_name, 'Post-Test' AS tipe, npo.nilai, npo.completed_at AS waktu
     FROM nilai_posttest npo
     JOIN users u ON npo.user_id = u.user_id
-    UNION ALL
-    SELECT u.full_name, CONCAT('Kuis Materi ', nk.materi_id) as tipe, nk.nilai, nk.completed_at as waktu
-    FROM nilai_kuis nk
-    JOIN users u ON nk.user_id = u.user_id
+
     ORDER BY waktu DESC
     LIMIT 10
 ";
+
+
 $recent_result = mysqli_query($conn, $recent_query);
 
 // Get average scores
@@ -39,6 +45,8 @@ $avg_pretest = mysqli_fetch_assoc(mysqli_query($conn, $avg_pretest_query))['avg_
 
 $avg_posttest_query = "SELECT AVG(nilai) as avg_nilai FROM nilai_posttest";
 $avg_posttest = mysqli_fetch_assoc(mysqli_query($conn, $avg_posttest_query))['avg_nilai'];
+
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -324,13 +332,7 @@ $avg_posttest = mysqli_fetch_assoc(mysqli_query($conn, $avg_posttest_query))['av
                 </div>
             </div>
             
-            <div class="stat-card">
-                <div class="stat-icon">📚</div>
-                <div class="stat-info">
-                    <h3><?php echo $total_materi; ?></h3>
-                    <p>Total Materi</p>
-                </div>
-            </div>
+            
         </div>
         
         <div class="section-header">
@@ -355,12 +357,7 @@ $avg_posttest = mysqli_fetch_assoc(mysqli_query($conn, $avg_posttest_query))['av
                 </p>
             </div>
             
-            <div class="menu-card">
-                <div class="icon">📥</div>
-                <h3>Export Data</h3>
-                <p>Unduh rekapitulasi nilai dalam format Excel/CSV</p>
-                <a href="export_nilai.php" class="btn-menu">Download Data</a>
-            </div>
+            
         </div>
         
         <div class="recent-activity">

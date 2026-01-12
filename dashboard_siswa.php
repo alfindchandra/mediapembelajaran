@@ -370,7 +370,8 @@ mysqli_data_seek($materi_result, 0);
                 <div class="icon">📚</div>
                 <h3>Buku Digital</h3>
                 <p>Akses Flipbook dan semua sumber materi</p>
-                <a href="book_viewer.php?buku_id=1"  class="btn-assessment secondary">Buka Buku</a>
+                <a href="book_viewer.php?book=JKD001"  class="btn-assessment secondary">
+                    Buka Buku</a>
 </div>
 
             <div class="assessment-card">
@@ -381,21 +382,24 @@ mysqli_data_seek($materi_result, 0);
             </div>
             
            
-            <div class="assessment-card">
-                <div class="icon">✅</div>
-                <h3>Post-Test</h3>
-                <p>Evaluasi akhir setelah menyelesaikan semua materi</p>
-                <?php if ($nilai_posttest): ?>
-                    <span class="nilai-badge"><?php echo number_format($nilai_posttest['nilai'], 2); ?></span>
-                    <br>
-                    <a href="posttest.php" class="btn-assessment completed">Lihat Hasil</a>
-                <?php else: ?>
-                    <a href="posttest.php" class="btn-assessment <?php echo $all_completed ? '' : 'disabled'; ?>">
-                        <?php echo $all_completed ? 'Mulai Post-Test' : 'Selesaikan Materi'; ?>
-                    </a>
-                <?php endif; ?>
-            </div>
-            
+         <div class="assessment-card">
+    <div class="icon">✅</div>
+    <h3>Post-Test</h3>
+    <p>Evaluasi akhir pembelajaran</p>
+
+    <?php if ($nilai_posttest): ?>
+        <span class="nilai-badge">
+            <?php echo number_format($nilai_posttest['nilai'], 2); ?>
+        </span>
+        <br>
+        <a href="posttest.php" class="btn-assessment completed">Lihat Hasil</a>
+    <?php else: ?>
+        <a href="posttest.php" class="btn-assessment">
+            Mulai Post-Test
+        </a>
+    <?php endif; ?>
+</div>
+
             <div class="assessment-card">
                 <div class="icon">📊</div>
                 <h3>Rekap Nilai</h3>
