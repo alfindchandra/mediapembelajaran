@@ -68,53 +68,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
             max-width: 900px;
-            width: 100%;
+            width: 40%;
             display: flex;
         }
         
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 60px 40px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .login-left h1 {
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-        
-        .login-left p {
-            font-size: 16px;
-            line-height: 1.6;
-            opacity: 0.9;
-        }
-        
-        .network-icon {
-            font-size: 80px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
+      
         
         .login-right {
             flex: 1;
             padding: 60px 40px;
+
+
         }
         
         .login-right h2 {
             color: #333;
             margin-bottom: 10px;
             font-size: 28px;
+            text-align: center;
         }
         
-        .login-right p {
-            color: #666;
-            margin-bottom: 30px;
-        }
-        
+ 
         .form-group {
             margin-bottom: 25px;
         }
@@ -201,15 +175,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="login-container">
-        <div class="login-left">
-            <div class="network-icon">🌐</div>
-            <h1>Learning Management System</h1>
-            <p>Platform pembelajaran interaktif untuk mata pelajaran Jaringan Komputer. Dilengkapi dengan materi e-book, animasi, dan sistem penilaian yang komprehensif.</p>
-        </div>
+       
         
         <div class="login-right">
             <h2>Selamat Datang</h2>
-            <p>Silakan login untuk melanjutkan</p>
             
             <?php if ($error): ?>
                 <div class="error-message"><?php echo $error; ?></div>

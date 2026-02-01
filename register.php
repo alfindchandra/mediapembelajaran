@@ -95,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
             max-width: 1000px;
-            width: 100%;
+            width: 50%;
             display: flex;
             animation: slideUp 0.5s ease;
         }
@@ -297,19 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="register-container">
-        <div class="register-left">
-            <div class="network-icon">🌐</div>
-            <h1>Bergabung dengan LMS</h1>
-            <p>Daftar sekarang dan mulai belajar Jaringan Komputer dengan metode yang interaktif dan menyenangkan!</p>
-            
-            <ul class="features">
-                <li>Akses materi pembelajaran interaktif</li>
-                <li>E-book digital dengan animasi</li>
-                <li>Kuis interaktif dan essay</li>
-                <li>Tracking progress belajar</li>
-                <li>Sertifikat setelah selesai</li>
-            </ul>
-        </div>
+       
         
         <div class="register-right">
             <h2>Buat Akun Baru</h2>

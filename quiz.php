@@ -1,64 +1,54 @@
 <?php
-require_once 'config.php'; // Pastikan config dipanggil agar session berjalan
-requireLogin(); // Pastikan user sudah login
+require_once 'config.php';
+requireSiswa();
 
+$user_id = $_SESSION['user_id'];
+
+// CEK PRETEST
+$pretest_query = "SELECT * FROM nilai_pretest WHERE user_id = $user_id";
+$pretest_result = mysqli_query($conn, $pretest_query);
+$pretest_completed = mysqli_num_rows($pretest_result) > 0;
+
+// CEK QUIZ
+$quiz_query = "SELECT * FROM nilai_quiz WHERE user_id = $user_id";
+$quiz_result = mysqli_query($conn, $quiz_query);
+$quiz_completed = mysqli_num_rows($quiz_result) > 0;
+$quiz_data = $quiz_completed ? mysqli_fetch_assoc($quiz_result) : null;
+
+// PROSES SIMPAN (HANYA JIKA BELUM PERNAH)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_score') {
-    header('Content-Type: application/json'); // Set header JSON agar JS bisa membaca respons
-
-    // 1. Ambil ID User dari Session (Lebih aman daripada input hidden)
-    $user_id = $_SESSION['user_id'];
+    header('Content-Type: application/json');
     
-    // 2. Ambil data dari POST
+    if ($quiz_completed) {
+        echo json_encode(['success' => false, 'message' => 'Anda sudah mengerjakan quiz!']);
+        exit();
+    }
+
     $total_soal = (int)($_POST['total_soal'] ?? 0);
     $jawaban_benar = (int)($_POST['jawaban_benar'] ?? 0);
     
-    // Validasi pembagian dengan nol
     if ($total_soal <= 0) {
         echo json_encode(['success' => false, 'message' => 'Total soal tidak valid.']);
         exit();
     }
 
-    // 3. Hitung Nilai Otomatis
-    // Rumus: (Jawaban Benar / Total Soal) * 100
     $nilai_persen = ($jawaban_benar / $total_soal) * 100;
-    
-    // Format nilai agar maksimal 2 desimal (misal: 83.33)
     $nilai_persen = number_format($nilai_persen, 2, '.', '');
 
-    // 4. Query INSERT atau UPDATE (Upsert)
-    // Jika user sudah pernah mengerjakan, nilai akan di-update. Jika belum, akan di-insert.
     $sql = "INSERT INTO nilai_quiz (user_id, total_soal, jawaban_benar, nilai, completed_at)
-            VALUES (?, ?, ?, ?, NOW())
-            ON DUPLICATE KEY UPDATE 
-            total_soal = VALUES(total_soal),
-            jawaban_benar = VALUES(jawaban_benar),
-            nilai = VALUES(nilai),
-            completed_at = NOW()";
+            VALUES (?, ?, ?, ?, NOW())";
             
     $stmt = mysqli_prepare($conn, $sql);
     
     if ($stmt) {
-        // "iiid" -> integer, integer, integer, double/decimal
         mysqli_stmt_bind_param($stmt, "iiid", $user_id, $total_soal, $jawaban_benar, $nilai_persen);
         
         if (mysqli_stmt_execute($stmt)) {
-            echo json_encode([
-                'success' => true, 
-                'message' => 'Nilai berhasil disimpan!',
-                'nilai' => $nilai_persen
-            ]);
+            echo json_encode(['success' => true, 'message' => 'Nilai berhasil disimpan!', 'nilai' => $nilai_persen]);
         } else {
-            echo json_encode([
-                'success' => false, 
-                'message' => 'Gagal menyimpan ke database: ' . mysqli_error($conn)
-            ]);
+            echo json_encode(['success' => false, 'message' => 'Gagal menyimpan: ' . mysqli_error($conn)]);
         }
         mysqli_stmt_close($stmt);
-    } else {
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Error SQL Statement: ' . mysqli_error($conn)
-        ]);
     }
     exit(); 
 }
@@ -76,12 +66,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 <style>
 /* ... (SEMUA KODE CSS DARI FILE quiz.html DISINI) ... */
-:root {
-  --green: #078065;
-  --dark-green: #045c4f;
-  --accent: #27ae60;
-}
-
+:root {--green:#078065;--dark-green:#045c4f;--accent:#27ae60;}
+body {font-family:'Poppins',sans-serif;background:url("img/lab.jpeg") no-repeat center center fixed;background-size:cover;margin:0;padding:0;color:#333;min-height:100vh;}
+.container {width:92%;max-width:1000px;margin:28px auto;background:rgba(255,255,255,0.9);border-radius:14px;padding:20px;box-shadow:0 8px 30px rgba(0,0,0,0.35);}
+h1,h2,h3 {text-align:center;color:var(--dark-green);margin:6px 0 12px;}
+button {background-color:var(--accent);color:#fff;border:none;padding:10px 16px;border-radius:10px;font-size:14px;cursor:pointer;transition:all 0.3s ease;}
+button:hover {background-color:var(--dark-green);transform:translateY(-2px);box-shadow:0 4px 8px rgba(0,0,0,0.2);}
+.locked-message {background:white;padding:40px;border-radius:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1);text-align:center;}
+.locked-icon {font-size:80px;margin-bottom:20px;}
+.result-card {background:white;padding:40px;border-radius:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1);text-align:center;}
+.result-icon {font-size:80px;margin-bottom:20px;}
+.result-score {font-size:48px;font-weight:bold;color:#27ae60;margin-bottom:10px;}
+.result-text {color:#666;font-size:18px;margin-bottom:30px;}
+.result-details {background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:30px;}
+.result-details p {color:#333;margin:5px 0;}
 /* ======== Background pakai gambar seperti materi.html ======== */
 body {
   font-family: 'Poppins', sans-serif;
@@ -317,6 +315,54 @@ thead th {
 </head>
 <body>
 
+<?php if (!$pretest_completed): ?>
+    <div class="container">
+        <div class="locked-message">
+            <div class="locked-icon">🔒</div>
+            <h2>Quiz Terkunci</h2>
+            <p style="color:#666;font-size:18px;">
+                Anda harus menyelesaikan <strong>Pre-Test</strong> terlebih dahulu<br>
+                sebelum dapat mengakses Quiz Interaktif.
+            </p>
+            <br>
+            <a href="pretest.php" style="display:inline-block;background:#27ae60;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">
+                Kerjakan Pre-Test
+            </a>
+            <br><br>
+            <a href="dashboard_siswa.php" style="display:inline-block;background:#95a5a6;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;">
+                Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+
+<?php elseif ($quiz_completed): ?>
+    <div class="container">
+        <div class="result-card">
+            <div class="result-icon">✅</div>
+            <h2>Quiz Sudah Selesai!</h2>
+            <div class="result-score"><?php echo number_format($quiz_data['nilai'], 2); ?></div>
+            <div class="result-text">Skor Anda</div>
+            
+            <div class="result-details">
+                <p><strong>Jawaban Benar:</strong> <?php echo $quiz_data['jawaban_benar']; ?> dari <?php echo $quiz_data['total_soal']; ?> soal</p>
+                <p><strong>Waktu Selesai:</strong> <?php echo formatTanggal($quiz_data['completed_at']); ?></p>
+            </div>
+            
+            <p style="color:#666;margin-bottom:20px;">
+                Anda sudah menyelesaikan quiz ini. Nilai yang tercatat adalah nilai pertama Anda.<br>
+                Quiz hanya bisa dikerjakan sekali.
+            </p>
+            
+            <a href="posttest.php" style="display:inline-block;background:#27ae60;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:5px;">
+                Lanjut ke Post-Test
+            </a>
+            <a href="dashboard_siswa.php" style="display:inline-block;background:#3498db;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin:5px;">
+                Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+<?php else: ?>
+    <!-- QUIZ INTERAKTIF AKAN DIMUNCULKAN DI SINI -->
 <input type="hidden" id="studentNameHidden" value="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'Siswa'); ?>">
 
 <div id="quizView" class="container">
@@ -1474,6 +1520,6 @@ window.addEventListener('load', () => {
   });
 });
 </script>
-
+<?php endif; ?>
 </body>
 </html>

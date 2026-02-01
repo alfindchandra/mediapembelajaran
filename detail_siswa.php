@@ -200,22 +200,45 @@ function badge($nilai){
 ?>
 
 <div class="scores-section">
-<h3>🧩 Evaluasi Interaktif</h3>
-<?php if ($interaktif): ?>
-<div class="score-item">
-    <div>
-        <strong>Interaktif Jaringan Komputer</strong><br>
-        Diselesaikan: <?= formatTanggal($interaktif['completed_at']); ?><br>
-        Benar: <?= $interaktif['jawaban_benar']; ?> dari <?= $interaktif['total_soal']; ?> soal
+<h3>📝 Jawaban Kuis Esai</h3>
+<?php
+// Ambil data kuis esai siswa
+$query_esai = "SELECT * FROM kuis_esai WHERE user_id = $user_id ORDER BY completed_at DESC";
+$result_esai = mysqli_query($conn, $query_esai);
+
+if ($result_esai && mysqli_num_rows($result_esai) > 0):
+    $no = 1;
+    while ($esai = mysqli_fetch_assoc($result_esai)):
+?>
+<div class="score-item" style="flex-direction:column; align-items:flex-start; margin-bottom:20px;">
+    <div style="width:100%; display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:2px solid #11998e; padding-bottom:10px;">
+        <div>
+            <strong style="color:#11998e; font-size:18px;">Soal <?= $esai['soal_id']; ?></strong><br>
+            <small style="color:#666;">📅 Diselesaikan: <?= formatTanggal($esai['completed_at']); ?></small>
+        </div>
+        <div style="background:#11998e; color:white; padding:5px 15px; border-radius:20px; font-size:14px; height:fit-content;">
+            #<?= $no; ?>
+        </div>
     </div>
-    <div class="score-badge <?= badge($interaktif['nilai']); ?>">
-        <?= number_format($interaktif['nilai'],2); ?>
+    
+    <div style="background:#f8f9fa; padding:15px; border-radius:8px; width:100%; border-left:3px solid #11998e;">
+        <strong style="color:#666;">✍️ Jawaban Siswa:</strong><br>
+        <p style="margin-top:8px; line-height:1.6; color:#333;">
+            <?= nl2br(htmlspecialchars($esai['jawaban'])); ?>
+        </p>
     </div>
 </div>
-<?php else: ?>
+<?php 
+    $no++;
+    endwhile;
+else: 
+?>
 <div class="score-item">
-    <div>Belum dikerjakan</div>
-    <div class="score-badge score-na">N/A</div>
+    <div>
+        <span style="font-size:48px;">📝</span><br><br>
+        <strong>Belum mengerjakan kuis esai</strong><br>
+        <small style="color:#999;">Siswa ini belum mengisi kuis esai</small>
+    </div>
 </div>
 <?php endif; ?>
 </div>

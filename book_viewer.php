@@ -59,38 +59,47 @@ mysqli_stmt_execute($stmt_soal);
 $result_soal = mysqli_stmt_get_result($stmt_soal);
 $soal_list = mysqli_fetch_all($result_soal, MYSQLI_ASSOC);
 
-// Function to convert YouTube URL to embed URL
-function getYouTubeEmbedUrl($url) {
+
+function getEmbedVideoUrl($url) {
     if (empty($url)) return '';
-    
-    // Jika sudah format embed, return as is
-    if (strpos($url, 'youtube.com/embed/') !== false) {
-        return $url;
+
+    // =====================
+    // YOUTUBE
+    // =====================
+    if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
+      
+        if (strpos($url, 'youtube.com/embed/') !== false) {
+            return $url . '?rel=0&modestbranding=1';
+        }
+
+        
+        if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $url, $m)) {
+            return "https://www.youtube.com/embed/" . $m[1] . "?rel=0&modestbranding=1";
+        }
+
+        if (preg_match('/youtu\.be\/([^\&\?\/]+)/', $url, $m)) {
+            return "https://www.youtube.com/embed/" . $m[1] . "?rel=0&modestbranding=1";
+        }
     }
+
     
-    // Parse berbagai format YouTube URL
-    $video_id = '';
-    
-    // Format: https://www.youtube.com/watch?v=VIDEO_ID
-    if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $url, $matches)) {
-        $video_id = $matches[1];
+    if (strpos($url, 'drive.google.com') !== false) {
+
+        // Format: https://drive.google.com/file/d/FILE_ID/view
+        if (preg_match('/\/file\/d\/([^\/]+)/', $url, $m)) {
+            return "https://drive.google.com/file/d/" . $m[1] . "/preview";
+        }
+
+        // Format: https://drive.google.com/open?id=FILE_ID
+        if (preg_match('/id=([^&]+)/', $url, $m)) {
+            return "https://drive.google.com/file/d/" . $m[1] . "/preview";
+        }
     }
-    // Format: https://youtu.be/VIDEO_ID
-    elseif (preg_match('/youtu\.be\/([^\&\?\/]+)/', $url, $matches)) {
-        $video_id = $matches[1];
-    }
-    // Format: https://www.youtube.com/embed/VIDEO_ID
-    elseif (preg_match('/youtube\.com\/embed\/([^\&\?\/]+)/', $url, $matches)) {
-        $video_id = $matches[1];
-    }
-    
-    if ($video_id) {
-        return "https://www.youtube.com/embed/" . $video_id . "?rel=0&modestbranding=1";
-    }
-    
-    // Jika bukan YouTube, return original URL (misal Vimeo, dll)
+
+   
     return $url;
 }
+
 
 // Update progress
 $persentase = ($page_number / count($halaman_list)) * 100;
@@ -628,8 +637,8 @@ mysqli_stmt_execute($stmt_progress);
                             <?php if ($halaman['tipe_konten'] === 'pdf'): ?>
                                 <!-- PDF Page -->
                                 <div class="page-content pdf-page">
-                                    <?php if (!empty($halaman['file_pdf']) && file_exists("reader/ADBI421103/" . $halaman['file_pdf'])): ?>
-                                        <iframe src="reader/ADBI421103/<?php echo htmlspecialchars($halaman['file_pdf']); ?>#toolbar=0&navpanes=0&scrollbar=0"
+                                    <?php if (!empty($halaman['file_pdf']) && file_exists("reader/buku/" . $halaman['file_pdf'])): ?>
+                                        <iframe src="reader/buku/<?php echo htmlspecialchars($halaman['file_pdf']); ?>#toolbar=0&navpanes=0&scrollbar=0"
                                                 title="<?php echo htmlspecialchars($halaman['judul_halaman']); ?>">
                                         </iframe>
                                     <?php else: ?>
@@ -646,7 +655,7 @@ mysqli_stmt_execute($stmt_progress);
                                    
                                     <div class="video-container">
                                         <?php 
-                                        $embed_url = getYouTubeEmbedUrl($halaman['video_url']);
+                                        $embed_url = getEmbedVideoUrl($halaman['video_url']);
                                         if (!empty($embed_url)): 
                                         ?>
                                             <iframe src="<?php echo htmlspecialchars($embed_url); ?>" 
@@ -737,20 +746,20 @@ mysqli_stmt_execute($stmt_progress);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
     <script>
         $(document).ready(function() {
-            // Get viewport dimensions
+           
             function getFlipbookDimensions() {
                 const viewportWidth = $(window).width();
                 const viewportHeight = $(window).height();
                 
-                // Calculate available space (minus header, progress, controls)
-                const availableHeight = viewportHeight - 200; // 200px for header, progress, controls
-                const availableWidth = viewportWidth - 100; // 100px for padding
+               
+                const availableHeight = viewportHeight - 200; 
+                const availableWidth = viewportWidth - 100; 
                 
-                // Aspect ratio 2:1 (double page spread)
+              
                 let width = Math.min(availableWidth, 1400);
                 let height = Math.min(availableHeight, 700);
                 
-                // Maintain aspect ratio
+                
                 if (width / 2 > height) {
                     width = height * 2;
                 } else {
