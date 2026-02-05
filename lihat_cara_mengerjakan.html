@@ -1,0 +1,871 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>📚 Cara Mengerjakan Quiz</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: url("img/lab.jpeg") no-repeat center center fixed;
+        background-size: cover;
+        color: #333;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+        border-bottom: 3px solid #078065;
+        padding-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #078065;
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #666;
+        font-size: 16px;
+      }
+
+      .nav-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e0e0e0;
+      }
+
+      .nav-tabs button {
+        background: #f0f0f0;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        color: #333;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+
+      .nav-tabs button:hover,
+      .nav-tabs button.active {
+        background: #078065;
+        color: white;
+      }
+
+      .tutorial-section {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .tutorial-section.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h2 {
+        color: #078065;
+        margin-top: 0;
+        margin-bottom: 15px;
+        border-left: 4px solid #078065;
+        padding-left: 15px;
+      }
+
+      h3 {
+        color: #045c4f;
+        margin: 20px 0 10px 0;
+      }
+
+      p,
+      li {
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 10px;
+      }
+
+      ol,
+      ul {
+        margin-left: 20px;
+        margin-bottom: 15px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      .example {
+        background: #f8f9fa;
+        border-left: 4px solid #078065;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .success {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .error {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .tips {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
+      }
+
+      .tips strong {
+        color: #856404;
+      }
+
+      .code-block {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        margin: 15px 0;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 30px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        background: #078065;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .btn:hover {
+        background: #045c4f;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn.secondary {
+        background: #6c757d;
+      }
+
+      .btn.secondary:hover {
+        background: #5a6268;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 20px 0;
+      }
+
+      .grid-item {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .grid-item h4 {
+        color: #078065;
+        margin-bottom: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 24px;
+        }
+
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+
+        .nav-tabs {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+          text-align: center;
+        }
+      }
+
+      .breadcrumb {
+        color: #999;
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+
+      .back-link {
+        color: #078065;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="quiz.php" class="back-link">← Kembali ke Quiz</a>
+      </div>
+
+      <div class="header">
+        <h1>📚 Cara Mengerjakan Quiz Networking</h1>
+        <p>Panduan lengkap untuk mengerjakan setiap soal dengan benar</p>
+      </div>
+
+      <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="overview">Ringkasan</button>
+        <button class="tab-btn" data-tab="soal1">Soal 1-2: Kabel</button>
+        <button class="tab-btn" data-tab="soal3">Soal 3: Transfer File</button>
+        <button class="tab-btn" data-tab="soal4">
+          Soal 4: Sharing Printer
+        </button>
+        <button class="tab-btn" data-tab="soal5">Soal 5: Matching</button>
+        <button class="tab-btn" data-tab="soal6">Soal 6: Urutan</button>
+        <button class="tab-btn" data-tab="soal7">Soal 7: Puzzle</button>
+        <button class="tab-btn" data-tab="soal8">Soal 8: Topologi</button>
+        <button class="tab-btn" data-tab="soal9">Soal 9: IP Config</button>
+        <button class="tab-btn" data-tab="soal10">Soal 10: IP Assign</button>
+      </div>
+
+      <!-- RINGKASAN -->
+      <div id="overview" class="tutorial-section active">
+        <h2>🎯 Ringkasan Quiz</h2>
+        <p>
+          Quiz ini terdiri dari 10 soal interaktif yang membantu Anda memahami
+          konsep networking, khususnya:
+        </p>
+
+        <h3>Topik Utama:</h3>
+        <ul>
+          <li>
+            <strong>Warna Kabel Jaringan</strong> - Standar T568A dan T568B
+          </li>
+          <li><strong>Transfer File</strong> - Komunikasi antar komputer</li>
+          <li>
+            <strong>Sharing Resource</strong> - Printer dan perangkat lainnya
+          </li>
+          <li>
+            <strong>Perangkat Jaringan</strong> - Fungsi router, switch, kabel
+          </li>
+          <li>
+            <strong>Topologi Jaringan</strong> - Arsitektur dan tata letak
+          </li>
+          <li><strong>IP Address</strong> - Konfigurasi dan assignment</li>
+        </ul>
+
+        <div class="tips">
+          <strong>💡 Tips Umum:</strong>
+          <ul>
+            <li>Baca instruksi setiap soal dengan TELITI</li>
+            <li>Perhatikan warna feedback: Hijau = benar, Merah = salah</li>
+            <li>Tidak ada batasan waktu - kerjakan dengan santai dan teliti</li>
+            <li>
+              Hanya bisa dikerjakan sekali, jadi pastikan paham sebelum submit
+            </li>
+            <li>Gunakan panduan ini jika ada soal yang bingung</li>
+          </ul>
+        </div>
+
+        <h3>Nilai Minimal:</h3>
+        <div class="example">
+          Tidak ada nilai minimal, semua jawaban benar = 100%
+        </div>
+      </div>
+
+      <!-- SOAL 1-2 -->
+      <div id="soal1" class="tutorial-section">
+        <h2>1️⃣ & 2️⃣ Urutkan Warna Kabel Jaringan</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>
+          Memahami dua standar pengurutkan warna kabel jaringan yang berbeda:
+          T568B (straight) dan T568A (cross).
+        </p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Perhatikan judul soal - apakah T568B atau T568A</li>
+          <li>Lihat 8 warna kabel yang tersedia (dalam keadaan acak)</li>
+          <li>
+            Drag satu warna kabel ke area putih yang bertuliskan "Letakkan warna
+            kabel di sini"
+          </li>
+          <li>Urutkan warna sesuai standar yang benar</li>
+          <li>
+            Jika benar, area akan berubah warna hijau dan muncul "Urutan benar!"
+          </li>
+          <li>Jika salah, coba drag ulang di urutan yang berbeda</li>
+        </ol>
+
+        <h3>✅ Standar T568B (Straight) - Soal 1</h3>
+        <div class="success">
+          <strong>Urutan yang Benar:</strong><br />
+          1️⃣ Putih Oranye<br />
+          2️⃣ Oranye<br />
+          3️⃣ Putih Hijau<br />
+          4️⃣ Biru<br />
+          5️⃣ Putih Biru<br />
+          6️⃣ Hijau<br />
+          7️⃣ Putih Coklat<br />
+          8️⃣ Coklat
+        </div>
+
+        <h3>✅ Standar T568A (Cross) - Soal 2</h3>
+        <div class="success">
+          <strong>Urutan yang Benar:</strong><br />
+          1️⃣ Putih Hijau<br />
+          2️⃣ Hijau<br />
+          3️⃣ Putih Oranye<br />
+          4️⃣ Biru<br />
+          5️⃣ Putih Biru<br />
+          6️⃣ Oranye<br />
+          7️⃣ Putih Coklat<br />
+          8️⃣ Coklat
+        </div>
+
+        <h3>💡 Tips & Trik</h3>
+        <div class="tips">
+          <ul>
+            <li>
+              Perbedaan T568A dan T568B hanya di posisi warna hijau dan oranye
+            </li>
+            <li>T568B lebih umum digunakan (straight cable)</li>
+            <li>T568A digunakan untuk cross-over cable</li>
+            <li>
+              Hafal dengan mnemonic: "ROY G BIV" dengan modifikasi untuk
+              networking
+            </li>
+            <li>
+              Drag harus satu per satu, tidak bisa drag berkali-kali sekaligus
+            </li>
+            <li>Jika salah, kabel akan kembali ke posisi semula, coba lagi</li>
+          </ul>
+        </div>
+
+        <h3>❌ Kesalahan Umum</h3>
+        <div class="error">
+          <ul>
+            <li>Lupa bahwa putih + warna ≠ warna + putih</li>
+            <li>Mengacaukan posisi warna hijau dan oranye</li>
+            <li>Drag terlalu cepat sehingga sistem tidak mendeteksi</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SOAL 3 -->
+      <div id="soal3" class="tutorial-section">
+        <h2>3️⃣ Simulasi Transfer File</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>
+          Memahami bagaimana transfer file antara dua komputer dalam jaringan
+          dengan validasi IP address.
+        </p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>
+            <strong>LANGKAH 1:</strong> Masukkan IP komputer tujuan di
+            textbox<br />
+            Contoh: <code>192.168.1.2</code>
+          </li>
+          <li>
+            <strong>LANGKAH 2:</strong> Klik tombol "Cek IP" untuk validasi
+          </li>
+          <li>
+            <strong>LANGKAH 3:</strong> Tunggu pesan feedback:
+            <ul>
+              <li>✅ Hijau: "IP benar, file siap ditransfer!"</li>
+              <li>❌ Merah: "IP salah, cek kembali!"</li>
+            </ul>
+          </li>
+          <li>
+            <strong>LANGKAH 4:</strong> Jika IP benar, file akan bisa di-drag
+          </li>
+          <li>
+            <strong>LANGKAH 5:</strong> Drag ketiga file satu per satu:
+            <ul>
+              <li>Dokumen.docx</li>
+              <li>Gambar.jpg</li>
+              <li>Data.xlsx</li>
+            </ul>
+          </li>
+          <li><strong>LANGKAH 6:</strong> Taruh di area "Komputer B"</li>
+          <li>
+            <strong>LANGKAH 7:</strong> Jika semua 3 file berhasil ditransfer,
+            soal selesai ✅
+          </li>
+        </ol>
+
+        <h3>✅ IP yang Benar</h3>
+        <div class="success">
+          <strong>IP Komputer B (Tujuan):</strong> <code>192.168.1.2</code>
+        </div>
+
+        <h3>🔧 Format IP Address</h3>
+        <div class="example">
+          <strong>Format Umum:</strong> XXX.XXX.XXX.XXX<br />
+          <strong>Contoh Valid:</strong><br />
+          • 192.168.1.2<br />
+          • 192.168.1.10<br />
+          • 192.168.1.100<br />
+          <strong>Contoh Tidak Valid:</strong><br />
+          • 192.168.1 (kurang oktet)<br />
+          • 192.168.1.256 (oktet terakhir > 255)<br />
+          • 192.168.1.a (ada huruf)
+        </div>
+
+        <h3>💡 Tips</h3>
+        <div class="tips">
+          <ul>
+            <li>IP format harus tepat: nnn.nnn.nnn.nnn</li>
+            <li>Setiap angka (octet) harus 0-255</li>
+            <li>Subnet mask default: 192.168.1.0/24</li>
+            <li>Drag file satu per satu, tunggu setiap file masuk</li>
+            <li>
+              File yang sudah ditransfer akan transparan/abu-abu di komputer A
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SOAL 4 -->
+      <div id="soal4" class="tutorial-section">
+        <h2>4️⃣ Simulasi Sharing Printer</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>
+          Memahami bagaimana sharing resource (printer) dalam jaringan dengan
+          validasi IP client.
+        </p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Masukkan IP Client: <code>192.168.1.3</code></li>
+          <li>Klik tombol "Cek IP"</li>
+          <li>Jika benar, pesan hijau muncul</li>
+          <li>
+            Drag dokumen dari Komputer Host ke Client:
+            <ul>
+              <li>TestDoc.pdf</li>
+              <li>Laporan.docx</li>
+            </ul>
+          </li>
+          <li>Jika semua dokumen berhasil di-share, soal selesai ✅</li>
+        </ol>
+
+        <h3>✅ IP yang Benar</h3>
+        <div class="success">
+          <strong>IP Client:</strong> <code>192.168.1.3</code>
+        </div>
+
+        <h3>💡 Perbedaan dengan Soal 3</h3>
+        <div class="example">
+          <strong>Soal 3 (Transfer File):</strong><br />
+          • IP Tujuan: 192.168.1.2<br />
+          • File: Dokumen, Gambar, Data<br />
+          <br />
+          <strong>Soal 4 (Sharing Printer):</strong><br />
+          • IP Client: 192.168.1.3<br />
+          • File: TestDoc.pdf, Laporan.docx<br />
+          <br />
+          ⚠️ Perhatikan angka IP-nya berbeda!
+        </div>
+      </div>
+
+      <!-- SOAL 5 -->
+      <div id="soal5" class="tutorial-section">
+        <h2>5️⃣ Hubungkan Gambar dengan Fungsinya</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>Mengenali perangkat jaringan dan memahami fungsinya.</p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Perhatikan 3 gambar di sebelah kiri</li>
+          <li>Perhatikan 3 fungsi di sebelah kanan</li>
+          <li>
+            <strong>KLIK GAMBAR:</strong> Pilih satu perangkat (misal: Router)
+          </li>
+          <li>Perhatikan gambar sekarang punya border HIJAU (selected)</li>
+          <li>
+            <strong>KLIK FUNGSI:</strong> Klik fungsi yang sesuai dengan
+            perangkat
+          </li>
+          <li>Jika pasangan BENAR, garis penghubung HIJAU akan muncul</li>
+          <li>
+            Ulangi hingga semua 3 perangkat terhubung dengan fungsi yang tepat
+          </li>
+        </ol>
+
+        <h3>✅ Pasangan yang Benar</h3>
+        <div class="success">
+          <strong>Router</strong> ↔ "Menyambungkan jaringan ke internet"<br />
+          <strong>Switch</strong> ↔ "Membagi koneksi antar perangkat"<br />
+          <strong>Kabel</strong> ↔ "Menghubungkan dua perangkat jaringan"
+        </div>
+
+        <h3>💡 Tips</h3>
+        <div class="tips">
+          <ul>
+            <li>Klik gambar DULUAN, tunggu border berubah hijau</li>
+            <li>BARU klik fungsi yang sesuai</li>
+            <li>Jangan drag-drop, cukup CLICK saja</li>
+            <li>Router untuk koneksi ke internet/outside network</li>
+            <li>Switch untuk menghubungkan perangkat dalam 1 LAN</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SOAL 6 -->
+      <div id="soal6" class="tutorial-section">
+        <h2>6️⃣ Susun Urutan Proses Jaringan</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>Memahami alur/urutan proses komunikasi data dalam jaringan.</p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Lihat 4 langkah yang tersedia (dalam keadaan acak)</li>
+          <li>Drag langkah-langkah untuk mengatur urutannya</li>
+          <li>Jika urutan BENAR, item akan berwarna HIJAU</li>
+          <li>Jika urutan SALAH, item tetap warna putih/abu</li>
+          <li>Ulangi drag hingga semua item hijau (semua benar)</li>
+        </ol>
+
+        <h3>✅ Urutan yang Benar</h3>
+        <div class="success">
+          <strong>Alur Komunikasi Data:</strong><br />
+          1️⃣ Komputer mengirimkan data<br />
+          2️⃣ Data dikirim melalui kabel jaringan<br />
+          3️⃣ Switch mengatur arah data<br />
+          4️⃣ Komputer tujuan menerima data
+        </div>
+
+        <h3>💡 Tips</h3>
+        <div class="tips">
+          <ul>
+            <li>Pikirkan logika: siapa yang paling PERTAMA?</li>
+            <li>Urutan ini adalah flow komunikasi dari AWAL hingga AKHIR</li>
+            <li>Mulai dari pengirim, melalui medium, sampai penerima</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SOAL 7 -->
+      <div id="soal7" class="tutorial-section">
+        <h2>7️⃣ Puzzle Kabel & Konektor</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>
+          Mencocokkan jenis kabel dengan konektor yang sesuai (yang kompatibel).
+        </p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Lihat 4 jenis kabel di ATAS: UTP, STP, Fiber, Coax</li>
+          <li>Lihat 4 jenis konektor di BAWAH: RJ45 (2x), SC, BNC</li>
+          <li>Drag kabel ke konektor yang SESUAI (bukan drag sembarangan)</li>
+          <li>Jika pasangan benar, garis HIJAU akan muncul</li>
+          <li>Ulangi sampai semua 4 kabel terhubung</li>
+        </ol>
+
+        <h3>✅ Pasangan yang Benar</h3>
+        <div class="success">
+          <strong>UTP (Kuning)</strong> → RJ45 (Hijau - posisi 1)<br />
+          <strong>STP (Biru)</strong> → RJ45 (Biru - posisi 2)<br />
+          <strong>Fiber (Ungu)</strong> → SC (Orange)<br />
+          <strong>Coax (Merah Muda)</strong> → BNC (Merah)
+        </div>
+
+        <h3>🔧 Penjelasan Standar</h3>
+        <div class="example">
+          <strong>UTP (Unshielded Twisted Pair):</strong><br />
+          • Kabel jaringan paling umum<br />
+          • Menggunakan konektor RJ45<br />
+          <br />
+          <strong>STP (Shielded Twisted Pair):</strong><br />
+          • Versi shielded dari UTP<br />
+          • Juga menggunakan konektor RJ45<br />
+          <br />
+          <strong>Fiber Optic:</strong><br />
+          • Kabel kecepatan tinggi<br />
+          • Menggunakan konektor SC, LC, atau Mtrj<br />
+          <br />
+          <strong>Coaxial:</strong><br />
+          • Kabel tua untuk TV/Cable<br />
+          • Menggunakan konektor BNC atau F-type
+        </div>
+
+        <h3>💡 Tips</h3>
+        <div class="tips">
+          <ul>
+            <li>RJ45 selalu untuk UTP/STP (kabel twisted pair)</li>
+            <li>Fiber optic selalu pakai SC atau LC (bukan RJ45!)</li>
+            <li>Coaxial selalu pakai BNC atau F-type</li>
+            <li>Drag dengan HATI-HATI, jangan terlalu cepat</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SOAL 8 -->
+      <div id="soal8" class="tutorial-section">
+        <h2>8️⃣ Susun Topologi Jaringan</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>
+          Mengatur perangkat sesuai dengan topologi jaringan STAR yang benar.
+        </p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Lihat 4 kotak dashed di tengah - ini posisi TARGET</li>
+          <li>
+            Lihat 4 perangkat di bawah yang bisa di-drag:
+            <ul>
+              <li>PC1 (biru)</li>
+              <li>PC2 (biru)</li>
+              <li>Switch (orange)</li>
+              <li>Router (ungu)</li>
+            </ul>
+          </li>
+          <li>Drag setiap perangkat ke posisi yang BENAR</li>
+          <li>Jika posisi benar, kotak target akan berubah hijau</li>
+        </ol>
+
+        <h3>✅ Topologi STAR yang Benar</h3>
+        <div class="success">
+          <pre>
+                    Router (atas)
+                        ↓
+        PC1 ← Switch (tengah) → PC2
+                    </pre
+          >
+        </div>
+
+        <h3>💡 Penjelasan Topologi STAR</h3>
+        <div class="example">
+          <strong>Ciri-ciri Topologi STAR:</strong><br />
+          • Ada pusat (Switch) yang menghubungkan semua perangkat<br />
+          • Setiap perangkat terhubung langsung ke pusat (switch)<br />
+          • Router terpisah untuk koneksi internet<br />
+          • Jika 1 perangkat rusak, yg lain tetap terhubung<br />
+          • Jika switch rusak, semua putus<br />
+          <br />
+          <strong>Keuntungan:</strong> Mudah diatur, mudah troubleshoot<br />
+          <strong>Kerugian:</strong> Butuh kabel banyak, switch jadi bottleneck
+        </div>
+      </div>
+
+      <!-- SOAL 9 -->
+      <div id="soal9" class="tutorial-section">
+        <h2>9️⃣ Simulasi Topologi - Masukkan IP</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>
+          Mengkonfigurasi IP address untuk setiap perangkat dalam topologi, lalu
+          mengirim pesan.
+        </p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Masukkan IP untuk Router (contoh: 192.168.1.1)</li>
+          <li>Masukkan IP untuk PC1 (contoh: 192.168.1.2)</li>
+          <li>Masukkan IP untuk PC2 (contoh: 192.168.1.3)</li>
+          <li>Masukkan IP untuk PC3 (contoh: 192.168.1.4)</li>
+          <li>Setiap IP harus VALID (format XXX.XXX.XXX.XXX)</li>
+          <li>Klik tombol "Kirim Pesan PC1 → PC2"</li>
+          <li>Jika semua IP valid, pesan akan terkirim ✅</li>
+        </ol>
+
+        <h3>✅ Contoh IP yang Benar</h3>
+        <div class="success">
+          <strong>Router:</strong> 192.168.1.1<br />
+          <strong>PC1:</strong> 192.168.1.2<br />
+          <strong>PC2:</strong> 192.168.1.3<br />
+          <strong>PC3:</strong> 192.168.1.4
+        </div>
+
+        <h3>🔧 Aturan IP Addressing</h3>
+        <div class="example">
+          <strong>Subnet: 192.168.1.0/24</strong><br />
+          • Network: 192.168.1.0<br />
+          • Gateway/Router: 192.168.1.1 ← SELALU .1<br />
+          • Host/PC: 192.168.1.2 - 192.168.1.254<br />
+          • Broadcast: 192.168.1.255<br />
+          <br />
+          <strong>Format IP yang VALID:</strong><br />
+          • 192.168.1.10 ✅<br />
+          • 192.168.1.100 ✅<br />
+          • 10.0.0.50 ✅<br />
+          <br />
+          <strong>Format IP yang TIDAK VALID:</strong><br />
+          • 192.168.1 ❌ (kurang 1 oktet)<br />
+          • 192.168.1.256 ❌ (oktet > 255)<br />
+          • 192.168.1.a ❌ (ada huruf)<br />
+          • 192.168.1.1.1 ❌ (oktet terlalu banyak)
+        </div>
+
+        <h3>💡 Tips</h3>
+        <div class="tips">
+          <ul>
+            <li>Router SELALU .1 dalam subnet</li>
+            <li>PC/Host bisa .2 sampai .254</li>
+            <li>Hindari .0 (network) dan .255 (broadcast)</li>
+            <li>Setiap device harus IP UNIK dalam jaringan</li>
+            <li>Subnet mask default: /24 atau 255.255.255.0</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SOAL 10 -->
+      <div id="soal10" class="tutorial-section">
+        <h2>🔟 Konfigurasi IP Jaringan</h2>
+
+        <h3>📖 Tujuan Soal</h3>
+        <p>Menetapkan IP address yang sesuai untuk perangkat yang berbeda.</p>
+
+        <h3>🎮 Cara Mengerjakan</h3>
+        <ol>
+          <li>Lihat 2 perangkat di tengah: PC1 dan Router</li>
+          <li>Lihat 2 IP di bawah yang bisa di-drag</li>
+          <li>Drag IP <strong>192.168.1.10</strong> → PC1</li>
+          <li>Drag IP <strong>192.168.1.1</strong> → Router</li>
+          <li>Jika benar, indikator akan hijau ✅</li>
+          <li>Jika salah, indikator akan merah ❌</li>
+        </ol>
+
+        <h3>✅ Penugasan IP yang Benar</h3>
+        <div class="success">
+          <strong>PC1 ← 192.168.1.10</strong><br />
+          (Host/Client IP)<br />
+          <br />
+          <strong>Router ← 192.168.1.1</strong><br />
+          (Gateway/Default Router IP)
+        </div>
+
+        <h3>❌ Penugasan IP yang Salah</h3>
+        <div class="error">
+          <strong>PC1 ← 192.168.1.1 ❌</strong><br />
+          Ini seharusnya untuk Router, bukan PC!<br />
+          <br />
+          <strong>Router ← 192.168.1.10 ❌</strong><br />
+          Router harus .1, bukan .10!
+        </div>
+
+        <h3>🔑 Aturan Penting</h3>
+        <div class="example">
+          <strong>.1 SELALU untuk Gateway/Router</strong><br />
+          <strong>.2 - .254 untuk Host/PC/Devices</strong><br />
+          <strong>.0 untuk Network Address</strong><br />
+          <strong>.255 untuk Broadcast Address</strong>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="action-buttons">
+        <a href="quiz.php" class="btn">← Kembali ke Quiz</a>
+        <a href="dashboard_siswa.php" class="btn secondary">🏠 Dashboard</a>
+      </div>
+    </div>
+
+    <script>
+      // Tab functionality
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          const tabId = this.getAttribute("data-tab");
+
+          // Hide all sections
+          document.querySelectorAll(".tutorial-section").forEach((section) => {
+            section.classList.remove("active");
+          });
+
+          // Remove active class from all buttons
+          document.querySelectorAll(".tab-btn").forEach((b) => {
+            b.classList.remove("active");
+          });
+
+          // Show selected section and activate button
+          document.getElementById(tabId).classList.add("active");
+          this.classList.add("active");
+
+          // Scroll to top
+          window.scrollTo(0, 0);
+        });
+      });
+    </script>
+  </body>
+</html>

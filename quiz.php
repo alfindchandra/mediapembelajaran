@@ -154,6 +154,16 @@ button.secondary:hover { background: #c0392b; }
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.info-btn {
+    background: #3498db;
+    padding: 8px 16px;
+    font-size: 13px;
+    margin-left: 8px;
+}
+
+.info-btn:hover {
+    background: #2980b9;
+}
 .options label:hover {
   background: #e8f8f5;
   border-color: var(--accent);
@@ -414,9 +424,9 @@ thead th {
   </table>
 
   <div style="text-align:center;margin-top:12px;">
-    <button id="downloadPDF">Lanjut Materi</button>
-    <button id="backHomeBtn" class="secondary small" style="margin-left:8px;">Kembali ke Beranda</button>
-  </div>
+    <button id="viewTutorialBtn" class="info-btn" onclick="showTutorialModal()">📚 Lihat Cara Mengerjakan</button>
+    <button id="backHomeBtn" class="secondary small">Kembali ke Beranda</button>
+</div>
 </div>
 
 <script>
@@ -1496,17 +1506,17 @@ function updateLiveScore(){
 }
 setInterval(updateLiveScore, 500);
 
-document.getElementById('backHomeBtn').addEventListener('click', ()=>{
-  if(confirm('🔄 Yakin ingin ingin melajutkan ke tes akhir')) {
-    window.location.href = 'pretest.php';
-  }
-});
 
 // ================= BACK HOME =================
 document.getElementById('backHomeBtn').addEventListener('click', ()=>{
   if(confirm('🔄 Yakin ingin kembali ke beranda')) {
     window.location.href = 'dashboard_siswa.php';
   }
+});
+
+document.getElementById('viewTutorialBtn').addEventListener('click', ()=>{
+  if(!confirm('📖 Yakin ingin melihat tutorial?')) return;
+  window.location.href = 'lihat_cara_mengerjakan.html';
 });
 
 // ====== CEK GAMBAR YANG GAGAL DIMUAT ======

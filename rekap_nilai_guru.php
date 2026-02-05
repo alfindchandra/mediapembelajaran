@@ -2,6 +2,43 @@
 require_once 'config.php';
 requireGuru();
 
+// Handle Reset Nilai
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] == 'reset_nilai') {
+    $user_id = intval($_POST['user_id']);
+    $tipe_reset = $_POST['tipe_reset']; // pretest, posttest, quiz, all
+    
+    $success = false;
+    
+    if ($tipe_reset == 'pretest') {
+        $query = "DELETE FROM nilai_pretest WHERE user_id = $user_id";
+        $success = mysqli_query($conn, $query);
+    } elseif ($tipe_reset == 'posttest') {
+        $query = "DELETE FROM nilai_posttest WHERE user_id = $user_id";
+        $success = mysqli_query($conn, $query);
+    } elseif ($tipe_reset == 'quiz') {
+        $query = "DELETE FROM nilai_quiz WHERE user_id = $user_id";
+        $success = mysqli_query($conn, $query);
+    } elseif ($tipe_reset == 'all') {
+        $query1 = "DELETE FROM nilai_pretest WHERE user_id = $user_id";
+        $query2 = "DELETE FROM nilai_posttest WHERE user_id = $user_id";
+        $query3 = "DELETE FROM nilai_quiz WHERE user_id = $user_id";
+        
+        $success = mysqli_query($conn, $query1) && 
+                   mysqli_query($conn, $query2) && 
+                   mysqli_query($conn, $query3);
+    }
+    
+    if ($success) {
+        $response = ['status' => 'success', 'message' => 'Nilai berhasil direset!'];
+    } else {
+        $response = ['status' => 'error', 'message' => 'Gagal mereset nilai: ' . mysqli_error($conn)];
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
+}
+
 // Get all students
 $siswa_query = "SELECT * FROM users WHERE role = 'siswa' ORDER BY full_name";
 $siswa_result = mysqli_query($conn, $siswa_query);
@@ -186,18 +223,41 @@ $siswa_result = mysqli_query($conn, $siswa_query);
             color: #666;
         }
         
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
         .btn-detail {
             background: #667eea;
             color: white;
-            padding: 6px 15px;
+            padding: 6px 12px;
             border-radius: 5px;
             text-decoration: none;
             font-size: 12px;
             transition: all 0.3s;
+            border: none;
+            cursor: pointer;
         }
         
         .btn-detail:hover {
             background: #5568d3;
+        }
+        
+        .btn-reset {
+            background: #ff6b6b;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-reset:hover {
+            background: #ff5252;
         }
         
         .summary-cards {
@@ -231,6 +291,128 @@ $siswa_result = mysqli_query($conn, $siswa_query);
             padding: 40px;
             color: #666;
         }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn-cancel {
+            background: #e0e0e0;
+            color: #333;
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-cancel:hover {
+            background: #d0d0d0;
+        }
+        
+        .btn-confirm {
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-confirm:hover {
+            background: #ff5252;
+        }
+        
+        .reset-option {
+            margin: 12px 0;
+        }
+        
+        .reset-option input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .reset-option label {
+            cursor: pointer;
+            color: #333;
+        }
+        
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            animation: slideIn 0.3s;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -240,12 +422,14 @@ $siswa_result = mysqli_query($conn, $siswa_query);
     </nav>
     
     <div class="container">
+        <div id="alertBox" class="alert"></div>
+        
         <div class="header-section">
             <div>
                 <h2>Rekapitulasi Nilai Semua Siswa</h2>
                 <p style="color: #666; margin-top: 5px;">Data lengkap Pre-Test, Post-Test, dan Kuis</p>
             </div>
-            <a href="export_nilai.php" class="btn-export">📥 Export ke Excel</a>
+            <a href="download_pdf.php" class="btn-export">📥 Download Rekap PDF</a>
         </div>
         
         <?php
@@ -362,7 +546,10 @@ while ($siswa = mysqli_fetch_assoc($siswa_result)):
         </span>
     </td>
     <td>
-        <a href="detail_siswa.php?id=<?= $user_id; ?>" class="btn-detail">Detail</a>
+        <div class="action-buttons">
+            <a href="detail_siswa.php?id=<?= $user_id; ?>" class="btn-detail">Detail</a>
+            <button class="btn-reset" onclick="openResetModal(<?= $user_id; ?>, '<?= htmlspecialchars($siswa['full_name']); ?>')">Reset</button>
+        </div>
     </td>
 </tr>
 <?php endwhile; ?>
@@ -377,7 +564,95 @@ while ($siswa = mysqli_fetch_assoc($siswa_result)):
         </div>
     </div>
     
+    <!-- Modal Reset Nilai -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Reset Nilai Siswa</div>
+            <div class="modal-body">
+                <p id="studentName" style="margin-bottom: 15px; font-weight: 600;"></p>
+                <p style="margin-bottom: 15px; color: #666;">Pilih jenis nilai yang ingin direset:</p>
+                
+                <div class="reset-option">
+                    <input type="radio" id="resetPretest" name="resetType" value="pretest" checked>
+                    <label for="resetPretest">Reset Pre-Test saja</label>
+                </div>
+                
+                <div class="reset-option">
+                    <input type="radio" id="resetQuiz" name="resetType" value="quiz">
+                    <label for="resetQuiz">Reset Quiz saja</label>
+                </div>
+                
+                <div class="reset-option">
+                    <input type="radio" id="resetPosttest" name="resetType" value="posttest">
+                    <label for="resetPosttest">Reset Post-Test saja</label>
+                </div>
+                
+                <div class="reset-option">
+                    <input type="radio" id="resetAll" name="resetType" value="all">
+                    <label for="resetAll">Reset Semua Nilai (Pre-Test, Quiz, Post-Test)</label>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeResetModal()">Batal</button>
+                <button class="btn-confirm" onclick="confirmReset()">Reset Nilai</button>
+            </div>
+        </div>
+    </div>
+    
     <script>
+        let currentUserId = null;
+        
+        function openResetModal(userId, studentName) {
+            currentUserId = userId;
+            document.getElementById('studentName').textContent = 'Siswa: ' + studentName;
+            document.getElementById('resetModal').style.display = 'block';
+        }
+        
+        function closeResetModal() {
+            document.getElementById('resetModal').style.display = 'none';
+            currentUserId = null;
+        }
+        
+        function confirmReset() {
+            const resetType = document.querySelector('input[name="resetType"]:checked').value;
+            
+            const formData = new FormData();
+            formData.append('action', 'reset_nilai');
+            formData.append('user_id', currentUserId);
+            formData.append('tipe_reset', resetType);
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                closeResetModal();
+                showAlert(data.message, data.status);
+                
+                if (data.status === 'success') {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                showAlert('Terjadi kesalahan: ' + error, 'error');
+            });
+        }
+        
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+            
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+        
         function filterTable() {
             const input = document.getElementById('searchInput');
             const filter = input.value.toUpperCase();
@@ -394,6 +669,14 @@ while ($siswa = mysqli_fetch_assoc($siswa_result)):
                         tr[i].style.display = 'none';
                     }
                 }
+            }
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('resetModal');
+            if (event.target == modal) {
+                closeResetModal();
             }
         }
     </script>

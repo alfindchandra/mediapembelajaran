@@ -163,7 +163,7 @@ $avg_posttest = mysqli_fetch_assoc(mysqli_query($conn, $avg_posttest_query))['av
         
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 40px;
         }
@@ -348,16 +348,18 @@ $avg_posttest = mysqli_fetch_assoc(mysqli_query($conn, $avg_posttest_query))['av
             </div>
             
             <div class="menu-card">
-                <div class="icon">📊</div>
-                <h3>Analisis Statistik</h3>
-                <p>Analisis mendalam tentang performa siswa</p>
-                <p style="margin-top: 15px;">
-                    <strong>Rata-rata Pre-Test:</strong> <?php echo $avg_pretest ? number_format($avg_pretest, 2) : 'N/A'; ?><br>
-                    <strong>Rata-rata Post-Test:</strong> <?php echo $avg_posttest ? number_format($avg_posttest, 2) : 'N/A'; ?>
-                </p>
+                <div class="icon">📝</div>
+                <h3>Kelola Soal Test</h3>
+                <p>Tambah, edit, atau hapus soal Pre-Test dan Post-Test</p>
+                <a href="kelola_soal.php" class="btn-menu">Kelola Soal</a>
             </div>
             
-            
+            <div class="menu-card">
+                <div class="icon">🔄</div>
+                <h3>Reset Rekap Nilai</h3>
+                <p>Reset nilai siswa untuk Pre-Test, Post-Test, atau semua data</p>
+                <a href="reset_nilai.php" class="btn-menu" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">Reset Nilai</a>
+            </div>
         </div>
         
         <div class="recent-activity">
