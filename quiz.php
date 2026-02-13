@@ -553,20 +553,25 @@ createCableDrag("1. Urutkan Warna Kabel Straight (T568B)", ["Putih Oranye","Oran
 createCableDrag("2. Urutkan Warna Kabel Cross (T568A)", ["Putih Hijau","Hijau","Putih Oranye","Biru","Putih Biru","Oranye","Putih Coklat","Coklat"], 2);
 
 const transferSim = document.createElement('div');
-transferSim.className='question';
-transferSim.dataset.qtype='transfer';
-transferSim.dataset.correct='false';
+transferSim.className = 'question';
+transferSim.dataset.correct = 'false';
 transferSim.innerHTML = `
   <h3 style="font-weight:600">3. Simulasi Transfer File</h3>
-  <p>Masukkan IP tujuan lalu drag file ke PC tujuan</p>
+  <p>Masukkan IP tujuan (Class C) lalu drag file ke PC tujuan</p>
   <div style="text-align:center;margin-bottom:10px;">
-    <input type="text" id="transfer-ip-input" placeholder="Masukkan IP tujuan PC (contoh: 192.168.1.2)" style="width:260px;padding:6px;border-radius:6px;border:1px solid #ccc;">
+    <input
+      type="text"
+      id="transfer-ip-input"
+      placeholder="Contoh: masukan IP PC tujuan"
+      style="width:260px;padding:6px;border-radius:6px;border:1px solid #ccc;"
+    >
     <button id="check-ip-btn" class="small">Cek IP</button>
     <p id="ip-status" style="font-weight:700;margin-top:6px;"></p>
   </div>
+
   <div class="row">
     <div class="computer" style="width:45%;">
-      <img src="img/pc2.jpeg" alt="Komputer A" class="device-images" style="width:80px;height:80px;margin:10px auto;">
+      <img src="img/pc2.jpeg" style="width:80px;height:80px;margin:10px auto;">
       <h4>Komputer A</h4>
       <div id="computer-a-files">
         <div class="file-item draggable" id="file_doc" draggable="false" style="cursor:not-allowed;margin:6px;">Dokumen.docx</div>
@@ -574,17 +579,28 @@ transferSim.innerHTML = `
         <div class="file-item draggable" id="file_xls" draggable="false" style="cursor:not-allowed;margin:6px;">Data.xlsx</div>
       </div>
     </div>
+
     <div class="computer" style="width:45%;">
-      <img src="img/pc3.jpeg" alt="Komputer B" class="device-images" style="width:80px;height:80px;margin:10px auto;">
+      <img src="img/pc3.jpeg" style="width:80px;height:80px;margin:10px auto;">
       <h4>Komputer B</h4>
-      <div id="computer-b-files" class="drop-area" style="min-height:100px;color:#999;padding:6px;border:2px dashed #ccc;border-radius:8px;">Belum ada file</div>
+      <div
+        id="computer-b-files"
+        class="drop-area"
+        style="min-height:100px;color:#999;padding:6px;border:2px dashed #ccc;border-radius:8px;"
+      >
+        Belum ada file
+      </div>
     </div>
   </div>
+
   <p id="transfer-result" style="font-weight:700;text-align:center;margin-top:8px;"></p>
 `;
+
 dndContainer.appendChild(transferSim);
 
-const correctIP = "192.168.1.2";
+// ===============================
+// ELEMENT REFERENCES
+// ===============================
 const compAFiles = transferSim.querySelector('#computer-a-files');
 const compBFiles = transferSim.querySelector('#computer-b-files');
 const ipInputTransfer = transferSim.querySelector('#transfer-ip-input');
@@ -594,114 +610,178 @@ const transferResult = transferSim.querySelector('#transfer-result');
 
 let transferredFiles = 0;
 
-checkIPBtn.addEventListener('click', ()=>{
+// ===============================
+// VALIDASI IP CLASS C (192.168.x.x)
+// ===============================
+function isValidClassC(ip) {
+  const parts = ip.split('.');
+  if (parts.length !== 4) return false;
+
+  // Semua harus angka
+  for (let p of parts) {
+    if (!/^\d+$/.test(p)) return false;
+  }
+
+  const [a, b, c, d] = parts.map(Number);
+
+  // Harus 192.168.x.x
+  if (a !== 192 || b !== 168) return false;
+
+  // Oktet ke-3 valid
+  if (c < 0 || c > 255) return false;
+
+  // Host hanya 2–254 (blok .0, .1, .255)
+  if (d <= 1 || d >= 255) return false;
+
+  return true;
+}
+
+// ===============================
+// CEK IP
+// ===============================
+checkIPBtn.addEventListener('click', () => {
   const ip = ipInputTransfer.value.trim();
-  if(ip === correctIP){
-    ipStatus.textContent = "IP benar, file siap ditransfer!";
+
+  if (isValidClassC(ip)) {
+    ipStatus.textContent = `IP valid (${ip}), file siap ditransfer!`;
     ipStatus.style.color = "#27ae60";
-    Array.from(compAFiles.children).forEach(f=>{
+
+    transferSim.dataset.targetIp = ip;
+
+    Array.from(compAFiles.children).forEach(f => {
       f.draggable = true;
       f.style.cursor = 'grab';
     });
   } else {
-    ipStatus.textContent = "IP salah, cek kembali!";
+    ipStatus.innerHTML =
+      "IP tidak valid! Gunakan format Class C (192.168.x.x), host 2–254";
     ipStatus.style.color = "#e74c3c";
-    Array.from(compAFiles.children).forEach(f=>{
+
+    Array.from(compAFiles.children).forEach(f => {
       f.draggable = false;
       f.style.cursor = 'not-allowed';
     });
   }
 });
 
-compAFiles.querySelectorAll('.draggable').forEach(f=>{
-  f.addEventListener('dragstart', e=>{
-    if(f.draggable) {
-      e.dataTransfer.setData('text/plain', e.target.id);
-      f.style.opacity = '0.5';
-    }
+// ===============================
+// DRAG FILE
+// ===============================
+compAFiles.querySelectorAll('.draggable').forEach(f => {
+  f.addEventListener('dragstart', e => {
+    if (!f.draggable) return;
+    e.dataTransfer.setData('text/plain', e.target.id);
+    f.style.opacity = '0.5';
   });
-  f.addEventListener('dragend', ()=>{
+
+  f.addEventListener('dragend', () => {
     f.style.opacity = '1';
   });
 });
 
-compBFiles.addEventListener('dragover', e=>{
+// ===============================
+// DROP FILE
+// ===============================
+compBFiles.addEventListener('dragover', e => {
   e.preventDefault();
   compBFiles.style.borderColor = '#27ae60';
 });
 
-compBFiles.addEventListener('dragleave', ()=>{
+compBFiles.addEventListener('dragleave', () => {
   compBFiles.style.borderColor = '#ccc';
 });
 
-compBFiles.addEventListener('drop', e=>{
+compBFiles.addEventListener('drop', e => {
   e.preventDefault();
   compBFiles.style.borderColor = '#ccc';
+
   const id = e.dataTransfer.getData('text/plain');
-  if(!id) return;
+  if (!id) return;
+
   const fileEl = document.getElementById(id);
-  if(!fileEl || fileEl.dataset.transferred === 'true') return;
-   
-  if(compBFiles.textContent.includes('Belum ada file')) {
+  if (!fileEl || fileEl.dataset.transferred === 'true') return;
+
+  if (compBFiles.textContent.includes('Belum ada file')) {
     compBFiles.textContent = '';
   }
-   
+
   const cloneEl = fileEl.cloneNode(true);
-  cloneEl.id = id + '_transferred';
   cloneEl.draggable = false;
   cloneEl.style.margin = '6px';
-  cloneEl.style.cursor = 'default';
   compBFiles.appendChild(cloneEl);
-   
+
   fileEl.dataset.transferred = 'true';
   fileEl.style.opacity = '0.3';
   fileEl.draggable = false;
-   
+
   transferredFiles++;
-  transferResult.textContent = `${fileEl.textContent} berhasil ditransfer ke ${correctIP}`;
+
+  transferResult.textContent =
+    `${fileEl.textContent} berhasil ditransfer ke ${transferSim.dataset.targetIp}`;
   transferResult.style.color = '#27ae60';
-   
-  if(transferredFiles === 3) {
+
+  if (transferredFiles === 3) {
     transferSim.dataset.correct = 'true';
     transferResult.textContent = 'Semua file berhasil ditransfer!';
   }
 });
-
 const printerSim = document.createElement('div');
-printerSim.className='question';
-printerSim.dataset.qtype='printer';
-printerSim.dataset.correct='false';
+printerSim.className = 'question';
+printerSim.dataset.qtype = 'printer';
+printerSim.dataset.correct = 'false';
+
 printerSim.innerHTML = `
   <h3 style="font-weight:600">4. Simulasi Sharing Printer</h3>
   <p>Masukkan IP client lalu drag dokumen untuk sharing</p>
+
   <div style="text-align:center;margin-bottom:10px;">
-    <input type="text" id="printer-ip-input" placeholder="Masukkan IP Client (contoh: 192.168.1.3)" style="width:260px;padding:6px;border-radius:6px;border:1px solid #ccc;">
+    <input
+      type="text"
+      id="printer-ip-input"
+      placeholder="192.168.1.3 - 192.168.1.254"
+      style="width:260px;padding:6px;border-radius:6px;border:1px solid #ccc;"
+    >
     <button id="check-printer-ip-btn" class="small">Cek IP</button>
     <p id="printer-ip-status" style="font-weight:700;margin-top:6px;"></p>
   </div>
+
   <div class="row">
     <div class="computer" style="width:45%;">
-      <img src="img/pc1.jpeg" alt="Komputer Host" class="device-img" style="width:80px;height:80px;margin:10px auto;">
+      <img src="img/pc1.jpeg" class="device-img" style="width:80px;height:80px;margin:10px auto;">
       <h4>Komputer Host</h4>
-      <div style="margin-top:8px;">
-        <img src="img/printer.png" alt="Printer" style="width:60px;height:60px;margin:0 auto;display:block;">
-        <div id="printer-files">
-          <div class="file-item draggable" id="p_testdoc" draggable="false" style="cursor:not-allowed;margin:6px;">TestDoc.pdf</div>
-          <div class="file-item draggable" id="p_report" draggable="false" style="cursor:not-allowed;margin:6px;">Laporan.docx</div>
+
+      <img src="img/printer.png" style="width:60px;height:60px;margin:0 auto;display:block;">
+      <div id="printer-files">
+        <div class="file-item draggable" id="p_testdoc" draggable="false" style="cursor:not-allowed;margin:6px;">
+          TestDoc.pdf
+        </div>
+        <div class="file-item draggable" id="p_report" draggable="false" style="cursor:not-allowed;margin:6px;">
+          Laporan.docx
         </div>
       </div>
     </div>
+
     <div class="computer" style="width:45%;">
-      <img src="img/pc2.jpeg" alt="Komputer Client" class="device-img" style="width:80px;height:80px;margin:10px auto;">
+      <img src="img/pc2.jpeg" class="device-img" style="width:80px;height:80px;margin:10px auto;">
       <h4>Komputer Client</h4>
-      <div id="client-printer-files" class="drop-area" style="min-height:100px;color:#999;padding:6px;border:2px dashed #ccc;border-radius:8px;">Belum ada file</div>
+      <div
+        id="client-printer-files"
+        class="drop-area"
+        style="min-height:100px;color:#999;padding:6px;border:2px dashed #ccc;border-radius:8px;"
+      >
+        Belum ada file
+      </div>
     </div>
   </div>
+
   <p id="printer-result" style="font-weight:700;text-align:center;margin-top:8px;"></p>
 `;
+
 dndContainer.appendChild(printerSim);
 
-const correctPrinterIP = "192.168.1.3";
+// ===============================
+// ELEMENT
+// ===============================
 const printerFiles = printerSim.querySelector('#printer-files');
 const clientPrinterFiles = printerSim.querySelector('#client-printer-files');
 const printerIPInput = printerSim.querySelector('#printer-ip-input');
@@ -711,71 +791,114 @@ const printerResult = printerSim.querySelector('#printer-result');
 
 let printerSentFiles = 0;
 
-checkPrinterIPBtn.addEventListener('click', ()=>{
+// ===============================
+// VALIDASI IP KHUSUS
+// HANYA 192.168.1.3 - 192.168.1.254
+// ===============================
+function isValidClientIP(ip) {
+  const regex = /^192\.168\.1\.(\d{1,3})$/;
+  const match = ip.match(regex);
+
+  if (!match) return false;
+
+  const last = parseInt(match[1], 10);
+
+  if (last <= 2 || last > 254) return false;
+
+  return true;
+}
+
+// ===============================
+// CEK IP
+// ===============================
+checkPrinterIPBtn.addEventListener('click', () => {
   const ip = printerIPInput.value.trim();
-  if(ip === correctPrinterIP){
-    printerIPStatus.textContent = "IP benar, file siap di-share!";
-    printerIPStatus.style.color = "#27ae60";
-    Array.from(printerFiles.children).forEach(f=>{ f.draggable = true; f.style.cursor = 'grab'; });
+
+  if (isValidClientIP(ip)) {
+    printerIPStatus.textContent = `IP valid (${ip})`;
+    printerIPStatus.style.color = '#27ae60';
+    printerSim.dataset.clientIp = ip;
+
+    printerFiles.querySelectorAll('.draggable').forEach(f => {
+      f.draggable = true;
+      f.style.cursor = 'grab';
+    });
   } else {
-    printerIPStatus.textContent = "IP salah, cek kembali!";
-    printerIPStatus.style.color = "#e74c3c";
-    Array.from(printerFiles.children).forEach(f=>{ f.draggable = false; f.style.cursor = 'not-allowed'; });
+    printerIPStatus.textContent =
+      'IP tidak valid! Gunakan 192.168.1.3 – 192.168.1.254';
+    printerIPStatus.style.color = '#e74c3c';
+
+    printerFiles.querySelectorAll('.draggable').forEach(f => {
+      f.draggable = false;
+      f.style.cursor = 'not-allowed';
+    });
   }
 });
 
-printerFiles.querySelectorAll('.draggable').forEach(f=>{f.addEventListener('dragstart', e=>{
-    if(f.draggable) {
-      e.dataTransfer.setData('text/plain', e.target.id);
-      f.style.opacity = '0.5';
-    }
+// ===============================
+// DRAG FILE
+// ===============================
+printerFiles.querySelectorAll('.draggable').forEach(file => {
+  file.addEventListener('dragstart', e => {
+    if (!file.draggable) return;
+    e.dataTransfer.setData('text/plain', file.id);
+    file.style.opacity = '0.5';
   });
-  f.addEventListener('dragend', ()=>{
-    f.style.opacity = '1';
+
+  file.addEventListener('dragend', () => {
+    file.style.opacity = '1';
   });
 });
 
-clientPrinterFiles.addEventListener('dragover', e=>{
+// ===============================
+// DROP FILE
+// ===============================
+clientPrinterFiles.addEventListener('dragover', e => {
   e.preventDefault();
   clientPrinterFiles.style.borderColor = '#27ae60';
 });
 
-clientPrinterFiles.addEventListener('dragleave', ()=>{
+clientPrinterFiles.addEventListener('dragleave', () => {
   clientPrinterFiles.style.borderColor = '#ccc';
 });
 
-clientPrinterFiles.addEventListener('drop', e=>{
+clientPrinterFiles.addEventListener('drop', e => {
   e.preventDefault();
   clientPrinterFiles.style.borderColor = '#ccc';
+
   const id = e.dataTransfer.getData('text/plain');
-  if(!id) return;
+  if (!id) return;
+
   const fileEl = document.getElementById(id);
-  if(!fileEl || fileEl.dataset.printer_sent === 'true') return;
-   
-  if(clientPrinterFiles.textContent.includes('Belum ada file')) {
+  if (!fileEl || fileEl.dataset.sent === 'true') return;
+
+  if (clientPrinterFiles.textContent.includes('Belum ada file')) {
     clientPrinterFiles.textContent = '';
   }
-   
-  const cloneEl = fileEl.cloneNode(true);
-  cloneEl.id = id + '_sent';
-  cloneEl.draggable = false;
-  cloneEl.style.margin = '6px';
-  cloneEl.style.cursor = 'default';
-  clientPrinterFiles.appendChild(cloneEl);
-   
-  fileEl.dataset.printer_sent = 'true';
+
+  const clone = fileEl.cloneNode(true);
+  clone.id = id + '_sent';
+  clone.draggable = false;
+  clone.style.cursor = 'default';
+
+  clientPrinterFiles.appendChild(clone);
+
+  fileEl.dataset.sent = 'true';
   fileEl.style.opacity = '0.3';
   fileEl.draggable = false;
-   
+
   printerSentFiles++;
-  printerResult.textContent = `${fileEl.textContent} berhasil dikirim ke ${correctPrinterIP}`;
+
+  printerResult.textContent =
+    `${fileEl.textContent} berhasil dikirim ke ${printerSim.dataset.clientIp}`;
   printerResult.style.color = '#27ae60';
-   
-  if(printerSentFiles === 2) {
+
+  if (printerSentFiles === 2) {
     printerSim.dataset.correct = 'true';
     printerResult.textContent = 'Semua file berhasil di-share!';
   }
 });
+
 
 const soal5 = document.createElement("div");
 soal5.className = "question";
@@ -1266,35 +1389,84 @@ dndContainer.appendChild(soal9);
     });
     return ips;
   }
+
+  // ===============================
+  // VALIDASI IPv4
+  // ===============================
   function validateIP(ip){
-    const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])){3}$/;
+    const regex =
+      /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
     return regex.test(ip);
   }
+
+  // ===============================
+  // AMBIL NETWORK PREFIX (xxx.xxx.xxx)
+  // ===============================
+  function getNetworkPrefix(ip){
+    return ip.split('.').slice(0,3).join('.');
+  }
+
   sendMsg9.addEventListener('click', ()=>{
     const ips = getIps9();
     let ok = true;
+
+    // ===============================
+    // VALIDASI FORMAT IP
+    // ===============================
     devices9.forEach(d=>{
       const st = d.querySelector('.status9');
-      if(!validateIP(ips[d.dataset.id])){ 
-        st.textContent='IP salah!'; 
-        st.style.color='#e74c3c'; 
-        ok=false; 
-      } else { 
-        st.textContent='Valid'; 
-        st.style.color='#27ae60'; 
+      const ip = ips[d.dataset.id];
+
+      if(!validateIP(ip)){
+        st.textContent = 'IP salah!';
+        st.style.color = '#e74c3c';
+        ok = false;
+      } else {
+        st.textContent = 'Format OK';
+        st.style.color = '#27ae60';
       }
     });
-    if(!ok){ 
-      message9.textContent='Periksa IP yang salah!'; 
-      message9.style.color='#e74c3c'; 
-      soal9.dataset.correct='false';
-      return; 
+
+    if(!ok){
+      message9.textContent = 'Periksa format IP!';
+      message9.style.color = '#e74c3c';
+      soal9.dataset.correct = 'false';
+      return;
     }
-    message9.textContent = `Pesan dari ${ips['pc1']} ke ${ips['pc2']} berhasil terkirim melalui Router ${ips['router']}`;
-    message9.style.color='#27ae60';
-    soal9.dataset.correct='true';
+
+    // ===============================
+    // VALIDASI SATU NETWORK DENGAN ROUTER
+    // ===============================
+    const routerNet = getNetworkPrefix(ips.router);
+
+    ['pc1','pc2','pc3'].forEach(id=>{
+      const device = soal9.querySelector(`[data-id="${id}"]`);
+      const st = device.querySelector('.status9');
+
+      if(getNetworkPrefix(ips[id]) !== routerNet){
+        st.textContent = 'Beda network!';
+        st.style.color = '#e74c3c';
+        ok = false;
+      }
+    });
+
+    if(!ok){
+      message9.textContent =
+        'PC harus satu network dengan Router (xxx.xxx.xxx.X)';
+      message9.style.color = '#e74c3c';
+      soal9.dataset.correct = 'false';
+      return;
+    }
+
+    // ===============================
+    // BERHASIL
+    // ===============================
+    message9.textContent =
+      `Pesan dari ${ips.pc1} ke ${ips.pc2} berhasil terkirim melalui Router ${ips.router}`;
+    message9.style.color = '#27ae60';
+    soal9.dataset.correct = 'true';
   });
-})();
+})(); 
 
 const soal10 = document.createElement('div');
 soal10.className='question';

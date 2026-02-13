@@ -38,40 +38,48 @@ mysqli_stmt_execute($stmt_pages);
 $result_pages = mysqli_stmt_get_result($stmt_pages);
 $halaman_list = mysqli_fetch_all($result_pages, MYSQLI_ASSOC);
 
+$total_pages = count($halaman_list);
+
+// Pastikan page_number ganjil (untuk tampilan 2 halaman)
+if ($page_number % 2 == 0) {
+    $page_number = $page_number - 1;
+}
+
 // Validasi nomor halaman
 if ($page_number < 1) $page_number = 1;
-if ($page_number > count($halaman_list)) $page_number = count($halaman_list);
+if ($page_number > $total_pages) $page_number = $total_pages;
 
-// Get current page info
-$current_page = $halaman_list[$page_number - 1] ?? null;
+// Ambil hanya 2 halaman yang akan ditampilkan (current dan next)
+$current_page_1 = isset($halaman_list[$page_number - 1]) ? $halaman_list[$page_number - 1] : null;
+$current_page_2 = isset($halaman_list[$page_number]) ? $halaman_list[$page_number] : null;
 
-// Get ALL kuis soal untuk buku ini (bukan per halaman)
+// Get ALL kuis soal untuk buku ini (hanya jika salah satu halaman adalah kuis)
 $soal_list = [];
-$query_soal = "SELECT s.*, e.jawaban as jawaban_user 
-               FROM kuis_soal s
-               LEFT JOIN kuis_esai e ON s.soal_id = e.soal_id AND e.user_id = ?
-               WHERE s.buku_id = ? 
-               ORDER BY s.urutan ASC";
+$is_quiz_page = ($current_page_1 && $current_page_1['tipe_konten'] === 'kuis') || 
+                ($current_page_2 && $current_page_2['tipe_konten'] === 'kuis');
 
-$stmt_soal = mysqli_prepare($conn, $query_soal);
-mysqli_stmt_bind_param($stmt_soal, "ii", $_SESSION['user_id'], $buku_id);
-mysqli_stmt_execute($stmt_soal);
-$result_soal = mysqli_stmt_get_result($stmt_soal);
-$soal_list = mysqli_fetch_all($result_soal, MYSQLI_ASSOC);
-
+if ($is_quiz_page) {
+    $query_soal = "SELECT s.*, e.jawaban as jawaban_user 
+                   FROM kuis_soal s
+                   LEFT JOIN kuis_esai e ON s.soal_id = e.soal_id AND e.user_id = ?
+                   WHERE s.buku_id = ? 
+                   ORDER BY s.urutan ASC";
+    
+    $stmt_soal = mysqli_prepare($conn, $query_soal);
+    mysqli_stmt_bind_param($stmt_soal, "ii", $_SESSION['user_id'], $buku_id);
+    mysqli_stmt_execute($stmt_soal);
+    $result_soal = mysqli_stmt_get_result($stmt_soal);
+    $soal_list = mysqli_fetch_all($result_soal, MYSQLI_ASSOC);
+}
 
 function getEmbedVideoUrl($url) {
     if (empty($url)) return '';
 
-    // =====================
     // YOUTUBE
-    // =====================
     if (strpos($url, 'youtube.com') !== false || strpos($url, 'youtu.be') !== false) {
-      
         if (strpos($url, 'youtube.com/embed/') !== false) {
             return $url . '?rel=0&modestbranding=1';
         }
-
         
         if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $url, $m)) {
             return "https://www.youtube.com/embed/" . $m[1] . "?rel=0&modestbranding=1";
@@ -82,27 +90,22 @@ function getEmbedVideoUrl($url) {
         }
     }
 
-    
+    // GOOGLE DRIVE
     if (strpos($url, 'drive.google.com') !== false) {
-
-        // Format: https://drive.google.com/file/d/FILE_ID/view
         if (preg_match('/\/file\/d\/([^\/]+)/', $url, $m)) {
             return "https://drive.google.com/file/d/" . $m[1] . "/preview";
         }
 
-        // Format: https://drive.google.com/open?id=FILE_ID
         if (preg_match('/id=([^&]+)/', $url, $m)) {
             return "https://drive.google.com/file/d/" . $m[1] . "/preview";
         }
     }
 
-   
     return $url;
 }
 
-
 // Update progress
-$persentase = ($page_number / count($halaman_list)) * 100;
+$persentase = ($page_number / $total_pages) * 100;
 $query_progress = "INSERT INTO progress_baca (user_id, buku_id, halaman_terakhir, persentase_selesai, status_baca) 
                    VALUES (?, ?, ?, ?, 'sedang_baca')
                    ON DUPLICATE KEY UPDATE 
@@ -115,6 +118,99 @@ mysqli_stmt_bind_param($stmt_progress, "iiddid",
     $_SESSION['user_id'], $buku_id, $page_number, $persentase, 
     $page_number, $persentase);
 mysqli_stmt_execute($stmt_progress);
+
+// Function to render page content
+function renderPageContent($halaman, $soal_list, $buku_id, $kode_buku) {
+    if (!$halaman) {
+        return '<div class="page-content empty-page"><div class="empty-message"><i class="bi bi-file-earmark"></i><p>Halaman kosong</p></div></div>';
+    }
+    
+    if ($halaman['tipe_konten'] === 'pdf') {
+        if (!empty($halaman['file_pdf']) && file_exists("reader/buku/" . $halaman['file_pdf'])) {
+            return '<div class="page-content pdf-page">
+                        <iframe src="reader/buku/' . htmlspecialchars($halaman['file_pdf']) . '#toolbar=0&navpanes=0&scrollbar=0" 
+                                title="' . htmlspecialchars($halaman['judul_halaman']) . '" 
+                                loading="lazy">
+                        </iframe>
+                    </div>';
+        } else {
+            return '<div class="page-content pdf-page">
+                        <div class="loading">
+                            <i class="bi bi-file-earmark-x"></i>
+                            <p>File tidak ditemukan</p>
+                        </div>
+                    </div>';
+        }
+    }
+    
+    if ($halaman['tipe_konten'] === 'video') {
+        $embed_url = getEmbedVideoUrl($halaman['video_url']);
+        if (!empty($embed_url)) {
+            return '<div class="page-content video-page">
+                        <div class="video-container">
+                            <iframe src="' . htmlspecialchars($embed_url) . '" 
+                                    title="' . htmlspecialchars($halaman['judul_halaman']) . '"
+                                    frameborder="0"
+                                    loading="lazy"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>';
+        } else {
+            return '<div class="page-content video-page">
+                        <div class="video-container">
+                            <div class="video-error">
+                                <i class="bi bi-camera-video-off"></i>
+                                <p>Video tidak tersedia</p>
+                                <small style="margin-top: 10px; opacity: 0.7;">URL video tidak valid</small>
+                            </div>
+                        </div>
+                    </div>';
+        }
+    }
+    
+    if ($halaman['tipe_konten'] === 'kuis') {
+        $quiz_html = '<div class="page-content quiz-page">
+                        <div class="quiz-content">
+                            <div class="quiz-header">
+                                <h2><i class="bi bi-pencil-square"></i> Kuis Akhir</h2>
+                                <p>Jawablah pertanyaan berikut dengan baik dan benar</p>
+                            </div>';
+        
+        if (empty($soal_list)) {
+            $quiz_html .= '<div class="no-quiz">
+                                <i class="bi bi-inbox"></i>
+                                <p>Belum ada soal untuk kuis ini</p>
+                            </div>';
+        } else {
+            $quiz_html .= '<form method="post" action="simpan_kuis_esai.php" id="quizForm">
+                                <input type="hidden" name="buku_id" value="' . $buku_id . '">
+                                <input type="hidden" name="kode_buku" value="' . htmlspecialchars($kode_buku) . '">';
+            
+            foreach ($soal_list as $idx => $soal) {
+                $jawaban = htmlspecialchars($soal['jawaban_user'] ?? '');
+                $quiz_html .= '<div class="question-box">
+                                    <label>' . ($idx + 1) . ". " . htmlspecialchars($soal['pertanyaan']) . '</label>
+                                    <textarea name="jawaban[' . $soal['soal_id'] . ']" 
+                                              rows="3" 
+                                              required 
+                                              placeholder="Tulis jawaban Anda di sini...">' . $jawaban . '</textarea>
+                                </div>';
+            }
+            
+            $quiz_html .= '<button type="submit" name="submit_quiz" class="quiz-submit-btn">
+                                <i class="bi bi-send"></i> Kirim Jawaban
+                            </button>
+                        </form>';
+        }
+        
+        $quiz_html .= '</div></div>';
+        return $quiz_html;
+    }
+    
+    return '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -123,8 +219,8 @@ mysqli_stmt_execute($stmt_progress);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($buku['judul']); ?> - Pembaca Buku</title>
     
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.css">
     
     <style>
         * {
@@ -230,7 +326,7 @@ mysqli_stmt_execute($stmt_progress);
             text-align: right;
         }
 
-        /* Main Content - Book Flipper */
+        /* Main Content - Book Display */
         .book-viewer {
             flex: 1;
             display: flex;
@@ -238,36 +334,35 @@ mysqli_stmt_execute($stmt_progress);
             align-items: center;
             padding: 20px;
             overflow: hidden;
-            perspective: 2000px;
-            min-height: 0; /* Important untuk flex */
+            min-height: 0;
         }
 
-        .flipbook-container {
+        .book-container {
             position: relative;
             width: 90%;
             max-width: 1400px;
             height: 85%;
             max-height: 700px;
-            margin: 0 auto;
             display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #flipbook {
-            width: 100%;
-            height: 100%;
+            gap: 10px;
+            perspective: 2000px;
         }
 
         .page {
-            width: 50%;
-            height: 100%;
+            flex: 1;
             background: white;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 5px 30px rgba(0,0,0,0.3);
             overflow: hidden;
+            border-radius: 5px;
+            transition: transform 0.3s ease;
+        }
+
+        .page:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(0,0,0,0.4);
         }
 
         .page-content {
@@ -276,6 +371,30 @@ mysqli_stmt_execute($stmt_progress);
             padding: 0;
             overflow: hidden;
             color: #333;
+        }
+
+        /* Empty Page */
+        .empty-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-message i {
+            font-size: 48px;
+            opacity: 0.3;
+            margin-bottom: 10px;
+        }
+
+        .empty-message p {
+            font-size: 14px;
+            opacity: 0.7;
         }
 
         /* PDF Page */
@@ -302,18 +421,6 @@ mysqli_stmt_execute($stmt_progress);
             padding: 0;
             display: flex;
             flex-direction: column;
-        }
-
-        .video-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .video-header h3 {
-            margin: 0;
-            font-size: 20px;
         }
 
         .video-container {
@@ -551,16 +658,25 @@ mysqli_stmt_execute($stmt_progress);
             background: rgba(255,255,255,0.5);
         }
 
-        /* Responsive */
-        @media (max-width: 1500px) {
-            .flipbook-container {
-                width: 85%;
-                height: 80%;
+        /* Page Transition */
+        .page-transition {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
             }
         }
 
+        /* Responsive */
         @media (max-width: 1200px) {
-            .flipbook-container {
+            .book-container {
                 width: 90%;
                 height: 75%;
             }
@@ -594,9 +710,20 @@ mysqli_stmt_execute($stmt_progress);
                 padding: 10px;
             }
 
-            .flipbook-container {
+            .book-container {
                 width: 95%;
                 height: 70%;
+                flex-direction: column;
+            }
+
+            .nav-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-controls button {
+                width: 100%;
+                justify-content: center;
             }
         }
     </style>
@@ -618,103 +745,19 @@ mysqli_stmt_execute($stmt_progress);
             </div>
         </header>
 
-        <!-- Progress Bar -->
-        <div class="progress-container">
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: <?php echo round($persentase, 2); ?>%"></div>
-            </div>
-            <div class="progress-text">
-                <i class="bi bi-bookmark-check"></i> Progress: <?php echo round($persentase); ?>%
-            </div>
-        </div>
+     
 
-        <!-- Main Content - Flipbook -->
+        <!-- Main Content - Book Pages -->
         <main class="book-viewer">
-            <div class="flipbook-container">
-                <div id="flipbook">
-                    <?php foreach ($halaman_list as $index => $halaman): ?>
-                        <div class="page">
-                            <?php if ($halaman['tipe_konten'] === 'pdf'): ?>
-                                <!-- PDF Page -->
-                                <div class="page-content pdf-page">
-                                    <?php if (!empty($halaman['file_pdf']) && file_exists("reader/buku/" . $halaman['file_pdf'])): ?>
-                                        <iframe src="reader/buku/<?php echo htmlspecialchars($halaman['file_pdf']); ?>#toolbar=0&navpanes=0&scrollbar=0"
-                                                title="<?php echo htmlspecialchars($halaman['judul_halaman']); ?>">
-                                        </iframe>
-                                    <?php else: ?>
-                                        <div class="loading">
-                                            <i class="bi bi-file-earmark-x"></i>
-                                            <p>File tidak ditemukan</p>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
+            <div class="book-container">
+                <!-- Left Page -->
+                <div class="page page-transition">
+                    <?php echo renderPageContent($current_page_1, $soal_list, $buku_id, $kode_buku); ?>
+                </div>
 
-                            <?php elseif ($halaman['tipe_konten'] === 'video'): ?>
-                                <!-- Video Page -->
-                                <div class="page-content video-page">
-                                   
-                                    <div class="video-container">
-                                        <?php 
-                                        $embed_url = getEmbedVideoUrl($halaman['video_url']);
-                                        if (!empty($embed_url)): 
-                                        ?>
-                                            <iframe src="<?php echo htmlspecialchars($embed_url); ?>" 
-                                                    title="<?php echo htmlspecialchars($halaman['judul_halaman']); ?>"
-                                                    frameborder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                                    allowfullscreen>
-                                            </iframe>
-                                        <?php else: ?>
-                                            <div class="video-error">
-                                                <i class="bi bi-camera-video-off"></i>
-                                                <p>Video tidak tersedia</p>
-                                                <small style="margin-top: 10px; opacity: 0.7;">URL video tidak valid</small>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-
-                            <?php elseif ($halaman['tipe_konten'] === 'kuis'): ?>
-                                <!-- Quiz Page - Menampilkan SEMUA soal untuk buku ini -->
-                                <div class="page-content quiz-page">
-                                    <div class="quiz-content">
-                                        <div class="quiz-header">
-                                            <h2><i class="bi bi-pencil-square"></i> Kuis Akhir</h2>
-                                            <p>Jawablah pertanyaan berikut dengan baik dan benar</p>
-                                        </div>
-
-                                        <?php if (empty($soal_list)): ?>
-                                            <div class="no-quiz">
-                                                <i class="bi bi-inbox"></i>
-                                                <p>Belum ada soal untuk kuis ini</p>
-                                            </div>
-                                        <?php else: ?>
-                                            <form method="post" action="simpan_kuis_esai.php" id="quizForm">
-                                                <input type="hidden" name="buku_id" value="<?php echo $buku_id; ?>">
-                                                <input type="hidden" name="kode_buku" value="<?php echo htmlspecialchars($kode_buku); ?>">
-
-                                                <?php foreach ($soal_list as $idx => $soal): ?>
-                                                    <div class="question-box">
-                                                        <label>
-                                                            <?php echo ($idx + 1) . ". " . htmlspecialchars($soal['pertanyaan']); ?>
-                                                        </label>
-                                                        <textarea name="jawaban[<?php echo $soal['soal_id']; ?>]" 
-                                                                  rows="3" 
-                                                                  required 
-                                                                  placeholder="Tulis jawaban Anda di sini..."><?php echo htmlspecialchars($soal['jawaban_user'] ?? ''); ?></textarea>
-                                                    </div>
-                                                <?php endforeach; ?>
-
-                                                <button type="submit" name="submit_quiz" class="quiz-submit-btn">
-                                                    <i class="bi bi-send"></i> Kirim Jawaban
-                                                </button>
-                                            </form>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+                <!-- Right Page -->
+                <div class="page page-transition">
+                    <?php echo renderPageContent($current_page_2, $soal_list, $buku_id, $kode_buku); ?>
                 </div>
             </div>
         </main>
@@ -723,144 +766,76 @@ mysqli_stmt_execute($stmt_progress);
         <div class="nav-controls">
             <button 
                 id="prevBtn"
-                <?php if ($page_number <= 2) echo 'disabled'; ?>
-                onclick="location.href='?book=<?php echo urlencode($kode_buku); ?>&page=<?php echo ($page_number - 2); ?>'">
+                <?php if ($page_number <= 1) echo 'disabled'; ?>
+                onclick="navigatePage(<?php echo max(1, $page_number - 2); ?>)">
                 <i class="bi bi-chevron-left"></i> Halaman Sebelumnya
             </button>
             
             <div class="page-info">
                 <span>Halaman</span>
-                <span class="page-indicator"><?php echo $page_number; ?> / <?php echo count($halaman_list); ?></span>
+                <span class="page-indicator"><?php echo $page_number; ?>-<?php echo min($page_number + 1, $total_pages); ?> / <?php echo $total_pages; ?></span>
             </div>
             
             <button 
                 id="nextBtn"
-                <?php if ($page_number >= count($halaman_list)) echo 'disabled'; ?>
-                onclick="location.href='?book=<?php echo urlencode($kode_buku); ?>&page=<?php echo ($page_number + 2); ?>'">
+                <?php if ($page_number + 1 >= $total_pages) echo 'disabled'; ?>
+                onclick="navigatePage(<?php echo min($total_pages, $page_number + 2); ?>)">
                 Halaman Selanjutnya <i class="bi bi-chevron-right"></i>
             </button>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
     <script>
-        $(document).ready(function() {
-           
-            function getFlipbookDimensions() {
-                const viewportWidth = $(window).width();
-                const viewportHeight = $(window).height();
-                
-               
-                const availableHeight = viewportHeight - 200; 
-                const availableWidth = viewportWidth - 100; 
-                
-              
-                let width = Math.min(availableWidth, 1400);
-                let height = Math.min(availableHeight, 700);
-                
-                
-                if (width / 2 > height) {
-                    width = height * 2;
-                } else {
-                    height = width / 2;
-                }
-                
-                return {
-                    width: Math.floor(width),
-                    height: Math.floor(height)
-                };
+        // Navigation function
+        function navigatePage(pageNum) {
+            window.location.href = '?book=<?php echo urlencode($kode_buku); ?>&page=' + pageNum;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.keyCode == 37 && !document.getElementById('prevBtn').disabled) { // Left arrow
+                navigatePage(<?php echo max(1, $page_number - 2); ?>);
+            } else if (e.keyCode == 39 && !document.getElementById('nextBtn').disabled) { // Right arrow
+                navigatePage(<?php echo min($total_pages, $page_number + 2); ?>);
             }
-
-            const dimensions = getFlipbookDimensions();
-            
-            $("#flipbook").turn({
-                width: dimensions.width,
-                height: dimensions.height,
-                autoCenter: true,
-                display: 'double',
-                acceleration: true,
-                gradients: true,
-                elevation: 50,
-                page: <?php echo $page_number; ?>,
-                when: {
-                    turned: function(event, page) {
-                        const newUrl = '?book=<?php echo urlencode($kode_buku); ?>&page=' + page;
-                        window.history.pushState({page: page}, '', newUrl);
-                    
-                        updateNavButtons(page, <?php echo count($halaman_list); ?>);
-                        
-                        // Update progress
-                        updateProgress(page, <?php echo count($halaman_list); ?>);
-                    }
-                }
-            });
-
-            // Keyboard navigation
-            $(document).keydown(function(e) {
-                if (e.keyCode == 37) { // Left arrow
-                    $("#flipbook").turn("previous");
-                } else if (e.keyCode == 39) { // Right arrow
-                    $("#flipbook").turn("next");
-                }
-            });
-
-            // Button navigation
-            $("#prevBtn").click(function(e) {
-                e.preventDefault();
-                $("#flipbook").turn("previous");
-            });
-
-            $("#nextBtn").click(function(e) {
-                e.preventDefault();
-                $("#flipbook").turn("next");
-            });
-
-            // Responsive resize
-            let resizeTimeout;
-            $(window).resize(function() {
-                clearTimeout(resizeTimeout);
-                resizeTimeout = setTimeout(function() {
-                    const newDimensions = getFlipbookDimensions();
-                    $("#flipbook").turn("size", newDimensions.width, newDimensions.height);
-                }, 250);
-            });
         });
-
-        function updateNavButtons(currentPage, totalPages) {
-            $("#prevBtn").prop('disabled', currentPage <= 1);
-            $("#nextBtn").prop('disabled', currentPage >= totalPages);
-            $(".page-indicator").text(currentPage + " / " + totalPages);
-        }
-
-        function updateProgress(currentPage, totalPages) {
-            const percentage = (currentPage / totalPages) * 100;
-            $(".progress-fill").css('width', percentage + '%');
-            $(".progress-text").html('<i class="bi bi-bookmark-check"></i> Progress: ' + Math.round(percentage) + '%');
-        }
 
         // Quiz form validation
-        $("#quizForm").submit(function(e) {
-            const textareas = $(this).find('textarea[required]');
-            let allFilled = true;
-            
-            textareas.each(function() {
-                if ($(this).val().trim() === '') {
-                    allFilled = false;
-                    $(this).css('border-color', '#f44336');
-                } else {
-                    $(this).css('border-color', 'rgba(255,255,255,0.3)');
+        const quizForm = document.getElementById('quizForm');
+        if (quizForm) {
+            quizForm.addEventListener('submit', function(e) {
+                const textareas = this.querySelectorAll('textarea[required]');
+                let allFilled = true;
+                
+                textareas.forEach(function(textarea) {
+                    if (textarea.value.trim() === '') {
+                        allFilled = false;
+                        textarea.style.borderColor = '#f44336';
+                    } else {
+                        textarea.style.borderColor = 'rgba(255,255,255,0.3)';
+                    }
+                });
+
+                if (!allFilled) {
+                    e.preventDefault();
+                    alert('❌ Mohon isi semua jawaban sebelum mengirim!');
+                    return false;
                 }
+
+                return confirm('📝 Apakah Anda yakin ingin mengirim jawaban?\n\nPastikan semua jawaban sudah benar.');
             });
+        }
 
-            if (!allFilled) {
-                e.preventDefault();
-                alert('❌ Mohon isi semua jawaban sebelum mengirim!');
-                return false;
-            }
-
-            return confirm('📝 Apakah Anda yakin ingin mengirim jawaban?\n\nPastikan semua jawaban sudah benar.');
-        });
+        // Preload next pages for smoother navigation
+        const currentPage = <?php echo $page_number; ?>;
+        const totalPages = <?php echo $total_pages; ?>;
+        
+        if (currentPage + 2 < totalPages) {
+            const preloadLink = document.createElement('link');
+            preloadLink.rel = 'prefetch';
+            preloadLink.href = '?book=<?php echo urlencode($kode_buku); ?>&page=' + (currentPage + 2);
+            document.head.appendChild(preloadLink);
+        }
     </script>
 </body>
 </html>
