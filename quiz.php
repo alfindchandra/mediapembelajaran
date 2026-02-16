@@ -1365,12 +1365,7 @@ soal9.innerHTML = `
       <input class="ip9" placeholder="IP PC2" style="width:120px;margin-top:6px;padding:4px;border-radius:4px;border:1px solid #ccc;">
       <div class="status9" style="margin-top:6px;"></div>
     </div>
-    <div class="device9" data-id="pc3" style="text-align:center;border:2px solid #ccc;padding:10px;border-radius:10px;background:#e3f2fd;">
-      <img src="img/pc3.jpeg" alt="PC3" class="device-images" style="width:60px;height:60px;margin:0 auto;">
-      <div style="font-weight:bold;margin-top:5px;">PC3</div>
-      <input class="ip9" placeholder="IP PC3" style="width:120px;margin-top:6px;padding:4px;border-radius:4px;border:1px solid #ccc;">
-      <div class="status9" style="margin-top:6px;"></div>
-    </div>
+    
   </div>
   <div style="text-align:center;margin-top:8px;"><button id="sendMsg9" class="small">Kirim Pesan PC1 → PC2</button><div id="message9" style="margin-top:8px;font-weight:700;"></div></div>
 `;
@@ -1439,7 +1434,7 @@ dndContainer.appendChild(soal9);
     // ===============================
     const routerNet = getNetworkPrefix(ips.router);
 
-    ['pc1','pc2','pc3'].forEach(id=>{
+    ['pc1','pc2'].forEach(id=>{
       const device = soal9.querySelector(`[data-id="${id}"]`);
       const st = device.querySelector('.status9');
 
